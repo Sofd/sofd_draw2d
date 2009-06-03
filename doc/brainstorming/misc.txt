@@ -1,0 +1,53 @@
+- ROI model objects (rectangle, ellipsis, polygon) specify their
+  points/dimensions in device-independent double coordinates (2D
+  points) -- probably physical coordinates (mm) in the case of DICOM
+  images
+
+  - sends change events whenever any of the points changes
+
+  - no dependencies on any GUI toolkit
+
+  - all the measurement algorithms operate on these objects
+
+- 0..* "viewers" on a model object
+
+  - viewer is associated with one ROI model object (ROI 1:n Viewer)
+    and with some kind of pixel-based 2D display; uses that to
+    draw a graphical representation of the ROI
+
+  - holds current transformation (affine transform) to translate ROI
+    corrdinates into display coordinates and back
+
+    - or maybe associate the transformation with the display because
+      it'll be the same for all viewers on that display?
+
+  - listens to ROI change events, updates display accordingly
+
+  - also listens to display change events (changes to the
+    transformation, e.g. scaling) and refreshes accordingly
+
+
+  - there should probably be an objects representing the collection of
+    model objects, and the viewers/displays associated with that
+
+- editors? or tools?
+
+  - also associated with a display (probably associated with a viewer
+    and thus indirectly with the display?)
+
+  - must react to mouse events and manipulate the ROI accordingly
+
+  - what about the initial creation phase of the ROI?
+
+  - maybe a "tool" abstraction (like vector graphic programs have it)
+    is better
+
+    - rectangle tool, ellipsis tool, freehand/polygon tool for initial
+      creation & manipulation of the corresponding ROI object;
+      universal "pointer" tool for manipulating any ROI object after
+      its creation
+
+    - ROIs (or their viewers? who exactly?) would provide
+      hooks/callbacks for the pointer tool
+
+    - "selected" state on ROI views, with visual feedback

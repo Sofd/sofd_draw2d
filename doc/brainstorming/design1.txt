@@ -1,0 +1,126 @@
+- de.sofd.draw2d.DrawingObject
+
+  - base class for vector drawing objects that live in an infinite,
+    continuous, 2-dimensional cartesian coordinate system with
+    double-valued x- and y-axes
+
+  - thus, coordinates of a DrawingObject (position, dimensions,
+    vertices, whatever) are specified as double values
+    (device-independent "object coordinates")
+
+  - no dependencies on any GUI toolkit
+
+  - subclasses: RectObject, EllipsisObject, PolygonObject
+
+
+- measurement algorithms will operate on DrawingObjects
+
+
+- de.sofd.draw2d.Drawing
+
+  - collection of DrawingObjects making up a "drawing"
+
+  - collects change events of its DrawingObjects and spreads them
+    onwards (i.e. is itself an event source)
+
+  - manipulation methods like adding/removing objects, including
+    corresponding events
+
+  - still no dependencies on any GUI toolkit
+
+
+- de.sofd.draw2d.editor.DrawingEditor
+
+  - viewer/editor of a de.sofd.draw2d.Drawing
+
+  - holds a transformation (affine transform) that's used for
+    converting object coordinates into pixel coordinates and back
+
+  - listens to change events of its Drawing, redraws its display
+    accordingly
+
+  - manages the "current selection", i.e. the (possibly empty) subset
+    of its DrawingObjects that are currently "selected"
+
+  - delegates drawing of the DrawingObjects (including visual feedback
+    of "selected" state etc.) and mouse "hit testing" etc. to special
+    per-object "drawing adapters":
+
+    - one such adapter per DrawingObject in the Drawing; the adapter
+      holds its DrawingObject and adds the mentioned
+      DrawingEditor-specific stuff to it
+
+    - base class de.sofd.draw2d.editor.DrawingObjectDrawingAdapter
+
+    - one subclass per DrawingObject subclass,
+      e.g. de.sofd.draw2d.editor.RectObjectDrawingAdapter etc.
+
+    - things it can do:
+
+      - draw its object onto the editor, taking into account things
+        like the selected state etc.
+
+      - define the visual "handles" of the object (dots the user can
+        interact with using the mouse)
+
+      - perform "hit tests" (test which handle, if any, a given mouse
+        coordinate hits, or if it hits the object itself but no
+        specific handle)
+
+      - provide callbacks for the select tool (see below) for mouse
+        interaction with each handle
+
+  - it should be supported to have more than one DrawingEditor on the
+    same drawing, all interoperating seamlessly
+
+  - still no dependency on a UI toolkit: this is an abstract base
+    class from which toolkit-specific (e.g. Swing, SWT, Hierobymous
+    ROI editor) classes will be derived
+
+    - these subclasses:
+
+      - implement abstract methods for drawing primitives like lines
+        and rectangles
+
+      - implement abstract methods for drawing/invalidating the editor
+        drawing area (or part thereof)
+
+      - call callback methods defined by the base class to inform the
+        editor of mouse and (eventually, maybe) keyboard events that
+        have happened
+
+      - if needed, call a callback method defined by the base class to
+        invalidate the drawing area or part of it
+
+      - call callback methods defined by the base class to inform the
+        editor of changes to the transformation from object to pixel
+        coordinates
+
+
+- de.sofd.draw2d.editor.DrawingEditorTool
+
+  - base class for drawing manipulation tools, like vector drawing
+    programs have them (rectangle tool, ellipsis tool, polygon tool,
+    selector tool)
+
+  - associated with the DrawingEditor to operate on (which may change
+    during the lifetime of the DrawingEditorTool)
+
+    - DrawingEditor and DrawingEditorTool are more closely coupled;
+      they know each other: A DrawingEditorTool is "activated on" a
+      DrawingEditor, at which point it becomes the DrawingEditor's
+      "current tool" (at any one time, there is 0 or 1 current tool on
+      a DrawingEditor). The DrawingEditor is aware of its current
+      tool, if any, and a DrawingEditorTool knows when it is the
+      current tool of a DrawingEditor
+
+  - defines mouse event listener methods
+    (mousePressed/Released/Clicked/Moved) that are called back by the
+    current DrawingEditor of the tool if the corresponding event
+    happens on the DrawingEditor.
+
+    Subclasses override these methods to implement their specific
+    behaviour, i.e. manipulate the Drawing accordingly
+
+    - some keyboard event listener methods will also be declared here
+      eventually
