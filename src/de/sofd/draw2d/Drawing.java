@@ -5,31 +5,115 @@ import java.util.EventObject;
 import java.util.List;
 
 import de.sofd.draw2d.event.DrawingListener;
+import de.sofd.draw2d.event.DrawingObjectAddOrMoveEvent;
 import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.event.DrawingObjectListener;
+import de.sofd.draw2d.event.DrawingObjectRemoveEvent;
 
-
+/**
+ * A Drawing made up of {@link DrawingObject}s. The objects are contained in a
+ * defined order (z-order) which determines which objects are drawn above/below
+ * which other ones.
+ * 
+ * @author olaf
+ */
 public class Drawing {
 
     // TODO: a LinkedIdentityHashSet would be better here (as soon as we've implemented it)
     private final List<DrawingObject> drawingObjects = new ArrayList<DrawingObject>();
 
-    public void addDrawingObject(DrawingObject o) {
-        if (drawingObjects.add(o)) {
+    /**
+     * Add o to this drawing position index in the z order. If o was already in
+     * the drawing, just move it to position index in the z order.
+     * 
+     * @param index
+     *            index
+     * @param o
+     *            o
+     */
+    public void addDrawingObject(int index, DrawingObject o) {
+        int oldIndex = drawingObjects.indexOf(o);
+        if ((oldIndex != -1) && (oldIndex != index)) {
+            drawingObjects.remove(oldIndex);
+            drawingObjects.add(index, o);
+            fireEvent(DrawingObjectAddOrMoveEvent.newObjectMoveEvent(this, oldIndex, index));
+        } else {
+            drawingObjects.add(index, o);
             o.addDrawingObjectListener(drawingObjectEventForwarder);
+            fireEvent(DrawingObjectAddOrMoveEvent.newObjectAddEvent(this, index));
         }
+    }
+
+    /**
+     * Add o to this drawing at the top of the z order (i.e. into the
+     * foreground, i.e. to the end of {@link #getObjects()}). If o was already
+     * in the drawing, just move it to the top of the z order.
+     * 
+     * @param o
+     *            o
+     */
+    public void addDrawingObject(DrawingObject o) {
+        addDrawingObject(getObjectCount(), o);
+    }
+    
+    public boolean contains(DrawingObject o) {
+        return drawingObjects.contains(o);
+    }
+
+    /**
+     * 
+     * @param o
+     *            o
+     * @return position of o in this drawing's z order, or -1 if o isn't part of
+     *         this drawing.
+     */
+    public int indexOf(DrawingObject o) {
+        return drawingObjects.indexOf(o);
     }
     
     public void removeDrawingObject(DrawingObject o) {
-        if (drawingObjects.remove(o)) {
-            o.removeDrawingObjectListener(drawingObjectEventForwarder);
+        int index = indexOf(o);
+        if (index != -1) {
+            removeDrawingObject(index);
         }
+    }
+
+    /**
+     * Remove DrawingObject at index index in z-order.
+     * 
+     * @param index
+     *            index
+     * @throws IndexOutOfBoundsException
+     *             if index is out of range
+     */
+    public void removeDrawingObject(int index) {
+        DrawingObject o = get(index);
+        drawingObjects.remove(index);
+        o.removeDrawingObjectListener(drawingObjectEventForwarder);
+        fireEvent(DrawingObjectRemoveEvent.newObjectRemoveEvent(this, index));
     }
 
     public int getObjectCount() {
         return drawingObjects.size();
     }
+
+    /**
+     * 
+     * @param index
+     *            index
+     * @return DrawingObject at index index in z-order
+     * @throws IndexOutOfBoundsException
+     *             if index is out of range
+     */
+    public DrawingObject get(int index) {
+        return drawingObjects.get(index);
+    }
     
+    /**
+     * 
+     * @return list of all DrawingObjects in this drawing, in reverse z order
+     *         (backmost object first)
+     */
     public List<DrawingObject> getObjects() {
         List<DrawingObject> result = new ArrayList<DrawingObject>();
         result.addAll(drawingObjects);
@@ -59,4 +143,5 @@ public class Drawing {
             l.onDrawingEvent(e);
         }
     }
+
 }

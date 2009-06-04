@@ -65,6 +65,10 @@ public abstract class DrawingObject {
         fireDrawingObjectEvent(new DrawingObjectLocationChangeEvent(this, false, oldLocation, newLocation));
     }
 
+    public void setLocation(double x, double y, double w, double h) {
+        setLocation(new Rectangle2D.Double(x, y, w, h));
+    }
+    
     /**
      * Called immediately after this DrawingObject's {@link #getLocation()} has
      * changed (before any post-change {@link DrawingObjectLocationChangeEvent}s

@@ -126,5 +126,11 @@
       eventually
 
 
-TODO: What about drawing temporary graphical artifacts like selection
-rectangles etc?
+TODO:
+
+- What about drawing temporary graphical artifacts like selection
+  rectangles etc?
+
+- graphical elements that are only drawn for a selected object
+  (e.g. mouse handles) should be drawn above everything else, no
+  matter where in the z-order the selected object is
