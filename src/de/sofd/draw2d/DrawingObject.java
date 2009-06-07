@@ -24,7 +24,7 @@ public abstract class DrawingObject {
     private final List<DrawingObjectListener> drawingObjectListeners =
         new ArrayList<DrawingObjectListener>();
     
-    private final Rectangle2D location = new Rectangle2D.Double();
+    private final Location location = new Location(0,0,0,0);
 
     /**
      * Gives the current 2D location of this object, as a rectangular bounding
@@ -34,7 +34,7 @@ public abstract class DrawingObject {
      * 
      * @return current 2D location of this object, as a rectangular bounding box
      */
-    public Rectangle2D getLocation() {
+    public Location getLocation() {
         return location;
     }
 
@@ -56,17 +56,16 @@ public abstract class DrawingObject {
      * 
      * @param newLocation new location for this object
      */
-    public void setLocation(Rectangle2D newLocation) {
-        Rectangle2D oldLocation = new Rectangle2D.Double();
-        oldLocation.setRect(this.location);
+    public void setLocation(Location newLocation) {
+        Location oldLocation = new Location(this.location);
         fireDrawingObjectEvent(new DrawingObjectLocationChangeEvent(this, true, oldLocation, newLocation));
-        this.location.setRect(newLocation);
+        this.location.setLocation(newLocation);
         onLocationChanged(oldLocation);
         fireDrawingObjectEvent(new DrawingObjectLocationChangeEvent(this, false, oldLocation, newLocation));
     }
 
-    public void setLocation(double x, double y, double w, double h) {
-        setLocation(new Rectangle2D.Double(x, y, w, h));
+    public Rectangle2D getBounds2D() {
+        return this.location.getBounds2D();
     }
     
     /**
@@ -80,12 +79,12 @@ public abstract class DrawingObject {
      * @param oldLocation
      *            oldLocation
      */
-    protected void onLocationChanged(Rectangle2D oldLocation) {
+    protected void onLocationChanged(Location oldLocation) {
         //
     }
     
     public boolean contains(Point2D pt) {
-        return getLocation().contains(pt);
+        return getBounds2D().contains(pt);
     }
     
     public void addDrawingObjectListener(DrawingObjectListener l) {
