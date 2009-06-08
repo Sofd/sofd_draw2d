@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JToolBar;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -125,6 +126,24 @@ public class DrawingListEditorFrame extends JFrame {
                 mvLocPt3By(0, -10, drobj);
             }
         });
+        toolbar.add(new SelectedObjectAction("z+") {
+            @Override
+            void actionPerformed(DrawingObject drobj) {
+                int idx = drawing.indexOf(drobj);
+                if (idx != -1 && idx < drawing.getObjectCount()-1) {
+                    drawing.addDrawingObject(idx + 1, drobj);
+                }
+            }
+        });
+        toolbar.add(new SelectedObjectAction("z-") {
+            @Override
+            void actionPerformed(DrawingObject drobj) {
+                int idx = drawing.indexOf(drobj);
+                if (idx > 0) {
+                    drawing.addDrawingObject(idx - 1, drobj);
+                }
+            }
+        });
         toolbar.add(new SelectedObjectAction("del") {
             @Override
             void actionPerformed(DrawingObject drobj) {
@@ -190,8 +209,13 @@ public class DrawingListEditorFrame extends JFrame {
                 DrawingObjectAddOrMoveEvent de = (DrawingObjectAddOrMoveEvent) e;
                 if (de.isAfterChange()) {
                     if (de.isMoved()) {
+                        ListSelectionModel lsm = drawingEditorList.getSelectionModel();
+                        boolean wasSelected = lsm.isSelectedIndex(de.getOldIndex());
                         Object drobj = drawingEditorListModel.remove(de.getOldIndex());
                         drawingEditorListModel.add(de.getNewIndex(), drobj);
+                        if (wasSelected) {
+                            lsm.addSelectionInterval(de.getNewIndex(), de.getNewIndex());
+                        }
                     } else {
                         drawingEditorListModel.add(de.getNewIndex(), de.getObject());
                     }
