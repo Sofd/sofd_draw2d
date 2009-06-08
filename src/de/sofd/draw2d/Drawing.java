@@ -23,8 +23,8 @@ public class Drawing {
     private final List<DrawingObject> drawingObjects = new ArrayList<DrawingObject>();
 
     /**
-     * Add o to this drawing position index in the z order. If o was already in
-     * the drawing, just move it to position index in the z order.
+     * Add o to this drawing at position index in the z order. If o was already
+     * in the drawing, just move it to position index in the z order.
      * 
      * @param index
      *            index
@@ -34,13 +34,15 @@ public class Drawing {
     public void addDrawingObject(int index, DrawingObject o) {
         int oldIndex = drawingObjects.indexOf(o);
         if ((oldIndex != -1) && (oldIndex != index)) {
+            fireEvent(DrawingObjectAddOrMoveEvent.newBeforeObjectMoveEvent(this, oldIndex, index));
             drawingObjects.remove(oldIndex);
             drawingObjects.add(index, o);
-            fireEvent(DrawingObjectAddOrMoveEvent.newObjectMoveEvent(this, oldIndex, index));
+            fireEvent(DrawingObjectAddOrMoveEvent.newAfterObjectMoveEvent(this, oldIndex, index));
         } else {
+            fireEvent(DrawingObjectAddOrMoveEvent.newBeforeObjectAddEvent(this, index));
             drawingObjects.add(index, o);
             o.addDrawingObjectListener(drawingObjectEventForwarder);
-            fireEvent(DrawingObjectAddOrMoveEvent.newObjectAddEvent(this, index));
+            fireEvent(DrawingObjectAddOrMoveEvent.newAfterObjectAddEvent(this, index));
         }
     }
 
@@ -87,10 +89,11 @@ public class Drawing {
      *             if index is out of range
      */
     public void removeDrawingObject(int index) {
+        fireEvent(DrawingObjectRemoveEvent.newBeforeObjectRemoveEvent(this, index));
         DrawingObject o = get(index);
         drawingObjects.remove(index);
         o.removeDrawingObjectListener(drawingObjectEventForwarder);
-        fireEvent(DrawingObjectRemoveEvent.newObjectRemoveEvent(this, index));
+        fireEvent(DrawingObjectRemoveEvent.newAfterObjectRemoveEvent(this, index));
     }
 
     public int getObjectCount() {
