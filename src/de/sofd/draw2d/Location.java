@@ -109,7 +109,7 @@ public class Location {
 
     public void moveBy(double dx, double dy) {
         x1 += dx; x2 += dx;
-        y1 =+ dy; y2 =+ dy;
+        y1 += dy; y2 += dy;
     }
 
     public void setLocation(Location other) {
