@@ -33,6 +33,10 @@ public class DrawingViewerTestApp {
         frame2.setSize(500, 500);
         frame2.setLocation(400, 200);
         frame2.setVisible(true);
+        
+        DrawingListEditorFrame drEdFrame = new DrawingListEditorFrame(dr);
+        drEdFrame.setBounds(50, 550, 400, 300);
+        drEdFrame.setVisible(true);
     }
     
 
