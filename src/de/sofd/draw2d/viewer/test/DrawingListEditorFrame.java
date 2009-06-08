@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
+import java.awt.geom.Point2D;
 import java.util.EventObject;
 
 import javax.swing.AbstractAction;
@@ -18,6 +19,9 @@ import javax.swing.event.ListSelectionListener;
 
 import de.sofd.draw2d.Drawing;
 import de.sofd.draw2d.DrawingObject;
+import de.sofd.draw2d.EllipseObject;
+import de.sofd.draw2d.Location;
+import de.sofd.draw2d.RectangleObject;
 import de.sofd.draw2d.event.DrawingListener;
 import de.sofd.draw2d.event.DrawingObjectAddOrMoveEvent;
 import de.sofd.draw2d.event.DrawingObjectEvent;
@@ -54,6 +58,13 @@ public class DrawingListEditorFrame extends JFrame {
         abstract void actionPerformed(DrawingObject drobj);
     };
     
+    private static void mvLocPt3By(double dx, double dy, DrawingObject drobj) {
+        Location loc = new Location(drobj.getLocation());
+        Point2D pt3 = loc.getPt3();
+        loc.setPt3(pt3.getX() + dx, pt3.getY() + dy);
+        drobj.setLocation(loc);
+    }
+    
     @Override
     protected void frameInit() {
         super.frameInit();
@@ -88,6 +99,48 @@ public class DrawingListEditorFrame extends JFrame {
             @Override
             void actionPerformed(DrawingObject drobj) {
                 drobj.moveBy(0, -10);
+            }
+        });
+        toolbar.add(new SelectedObjectAction("x3+") {
+            @Override
+            void actionPerformed(DrawingObject drobj) {
+                mvLocPt3By(10, 0, drobj);
+            }
+        });
+        toolbar.add(new SelectedObjectAction("x3-") {
+            @Override
+            void actionPerformed(DrawingObject drobj) {
+                mvLocPt3By(-10, 0, drobj);
+            }
+        });
+        toolbar.add(new SelectedObjectAction("y3+") {
+            @Override
+            void actionPerformed(DrawingObject drobj) {
+                mvLocPt3By(0, 10, drobj);
+            }
+        });
+        toolbar.add(new SelectedObjectAction("y3-") {
+            @Override
+            void actionPerformed(DrawingObject drobj) {
+                mvLocPt3By(0, -10, drobj);
+            }
+        });
+        toolbar.add(new SelectedObjectAction("del") {
+            @Override
+            void actionPerformed(DrawingObject drobj) {
+                drawing.removeDrawingObject(drobj);
+            }
+        });
+        toolbar.add(new AbstractAction("+rect") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                drawing.addDrawingObject(new RectangleObject(50,50,150,100));
+            }
+        });
+        toolbar.add(new AbstractAction("+ell") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                drawing.addDrawingObject(new EllipseObject(50,50,150,100));
             }
         });
 
