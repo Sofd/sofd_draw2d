@@ -6,11 +6,19 @@ import java.awt.geom.Rectangle2D;
 
 public class EllipseObject extends DrawingObject {
 
+    /**
+     * 
+     * @return the ellipse shape this EllipseObject represents
+     */
+    public Ellipse2D getEllipse() {
+        // TODO: cache the ellipse whenever this.location changes...
+        Rectangle2D bounds = this.getBounds2D();
+        return new Ellipse2D.Double(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+    }
+    
     @Override
     public boolean contains(Point2D pt) {
-        Rectangle2D bounds = this.getBounds2D();
-        // TODO: cache the ellipse whenever this.location changes...
-        return new Ellipse2D.Double(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight()).contains(pt);
+        return getEllipse().contains(pt);
     }
     
 }

@@ -6,7 +6,6 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
-import java.awt.image.AffineTransformOp;
 import java.util.EventObject;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -15,6 +14,8 @@ import javax.swing.JPanel;
 
 import de.sofd.draw2d.Drawing;
 import de.sofd.draw2d.DrawingObject;
+import de.sofd.draw2d.EllipseObject;
+import de.sofd.draw2d.RectangleObject;
 import de.sofd.draw2d.event.DrawingListener;
 import de.sofd.draw2d.event.DrawingObjectAddOrMoveEvent;
 import de.sofd.draw2d.event.DrawingObjectLocationChangeEvent;
@@ -22,23 +23,40 @@ import de.sofd.draw2d.event.DrawingObjectRemoveEvent;
 
 public class DrawingViewer extends JPanel {
 
+    private static final long serialVersionUID = -5162812267404406219L;
+
     private Drawing drawing;
     private Map<DrawingObject, DrawingObjectDrawingAdapter> objectDrawingAdapters
         = new IdentityHashMap<DrawingObject, DrawingObjectDrawingAdapter>();
 
-    private AffineTransform object2displayTransform;
-    private AffineTransformOp object2displayTransformOp;
-    private AffineTransform display2objectTransform;
+    private AffineTransform objectToDisplayTransform;
+    private AffineTransform displayToObjectTransform;
 
-    public void setObject2DisplayTransform(AffineTransform t) {
+    public DrawingViewer() {
+        setObjectToDisplayTransform(new AffineTransform());
+    }
+    
+    public DrawingViewer(Drawing drawing) {
+        this();
+        setDrawing(drawing);
+    }
+
+    public void setObjectToDisplayTransform(AffineTransform t) {
         try {
-            display2objectTransform = t.createInverse();
-            object2displayTransform = t;
-            this.object2displayTransformOp = new AffineTransformOp(object2displayTransform, AffineTransformOp.TYPE_BILINEAR);
+            displayToObjectTransform = t.createInverse();
+            objectToDisplayTransform = t;
         } catch (NoninvertibleTransformException e) {
             throw new IllegalArgumentException("not invertible: " + t, e);
         }
         repaint();
+    }
+    
+    public AffineTransform getObjectToDisplayTransform() {
+        return objectToDisplayTransform;
+    }
+
+    public AffineTransform getDisplayToObjectTransform() {
+        return displayToObjectTransform;
     }
     
     public void setDrawing(Drawing d) {
@@ -57,8 +75,18 @@ public class DrawingViewer extends JPanel {
     }
 
     
-    protected DrawingObjectDrawingAdapter createDrawingAdapterFor(DrawingObject odrobj) {
-        return new DrawingObjectDrawingAdapter();
+    protected DrawingObjectDrawingAdapter createDrawingAdapterFor(DrawingObject drobj) {
+        /*
+         * TODO: use externally configurable DrawingObject class => adapter
+         * class mapping instead of hard-coding the factory method like this
+         */
+        if (drobj instanceof EllipseObject) {
+            return new EllipseObjectDrawingAdapter(this, (EllipseObject) drobj);
+        } else if (drobj instanceof RectangleObject) {
+            return new RectangleObjectDrawingAdapter(this, (RectangleObject) drobj);
+        } else {
+            return new DrawingObjectDrawingAdapter(this, drobj);
+        }
     }
 
     private DrawingListener drawingEventHandler = new DrawingListener() {
@@ -125,8 +153,8 @@ public class DrawingViewer extends JPanel {
             DrawingObjectDrawingAdapter drawingAdapter = objectDrawingAdapters.get(drobj);
             assert drawingAdapter != null;
             Rectangle clip = g2d.getClipBounds();
-            // if (clip != null && !drawingAdapter.objectOverlaps(clip)) { continue; }
-            // drawingAdapter.paintObjectOn(g2d);
+            if (clip != null && !drawingAdapter.objectOverlaps(clip)) { continue; }
+            drawingAdapter.paintObjectOn((Graphics2D) g2d.create());
         }
     }
 

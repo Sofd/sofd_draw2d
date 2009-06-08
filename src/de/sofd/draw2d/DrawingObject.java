@@ -63,6 +63,16 @@ public abstract class DrawingObject {
         onLocationChanged(oldLocation);
         fireDrawingObjectEvent(new DrawingObjectLocationChangeEvent(this, false, oldLocation, newLocation));
     }
+    
+    public void setLocation(double x1, double y1, double x2, double y2) {
+        setLocation(new Location(x1, y1, x2, y2));
+    }
+    
+    public void moveBy(double dx, double dy) {
+        Location newLoc = new Location(location);
+        newLoc.moveBy(dx, dy);
+        setLocation(newLoc);
+    }
 
     public Rectangle2D getBounds2D() {
         return this.location.getBounds2D();
