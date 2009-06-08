@@ -119,4 +119,9 @@ public class Location {
         this.y2 = other.y2;
     }
     
+    @Override
+    public String toString() {
+        return "Loc[(" + x1 + "," + y1 + ") -- (" + x2 + "," + y2 + ")]";
+    }
+    
 }
