@@ -4,6 +4,10 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import de.sofd.draw2d.DrawingObject;
 import de.sofd.draw2d.event.DrawingObjectEvent;
@@ -13,6 +17,8 @@ public class DrawingObjectDrawingAdapter {
 
     private final DrawingViewer viewer;
     private final DrawingObject drawingObject;
+
+    public static final int HANDLE_BOX_WIDTH = 5;
     
     public DrawingObjectDrawingAdapter(DrawingViewer viewer, DrawingObject drawingObject) {
         this.viewer = viewer;
@@ -34,6 +40,19 @@ public class DrawingObjectDrawingAdapter {
     public void paintSelectionVisualizationOn(Graphics2D g2d, boolean isSelected) {
         if (isSelected) {
             g2d.setPaint(Color.GREEN);
+            // by default, draw all the object's handles
+            int count = getHandleCount();
+            for (int i=0; i<count; ++i) {
+                ObjectMouseHandle handle = getHandle(i);
+                if (null != handle) { // should always be the case...
+                    g2d.fillRect((int) (handle.getX() - HANDLE_BOX_WIDTH/2),
+                                 (int) (handle.getY() - HANDLE_BOX_WIDTH/2),
+                                 HANDLE_BOX_WIDTH,
+                                 HANDLE_BOX_WIDTH);
+                }
+            }
+
+            //... and a dashed rectangle around the object
             g2d.transform(getViewer().getObjectToDisplayTransform());
             // dash segment lengths scale with the transformation for now (they shouldn't)
             g2d.setStroke(new BasicStroke(0, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[]{2,4}, 0.0f));
@@ -62,4 +81,40 @@ public class DrawingObjectDrawingAdapter {
         viewer.repaintObjectArea(drawingObject);
     }
 
+    
+    private class BoundsHandle extends ObjectMouseHandle {
+        //private static final long serialVersionUID = 3673099677005547116L;
+        private final int nr;
+        public BoundsHandle(int nr, double x, double y) {
+            super(DrawingObjectDrawingAdapter.class.getName() + ".boundsHandle" + nr, x, y);
+            this.nr = nr;
+        }
+        public int getNr() {
+            return nr;
+        }
+    }
+    
+    public int getHandleCount() {
+        return 4;
+    }
+    
+    public ObjectMouseHandle getHandle(int i) {
+        if (i >= 0 && i < 4) {
+            Point2D position = drawingObject.getLocation().getPt(i);
+            viewer.getObjectToDisplayTransform().transform(position, position);
+            return new BoundsHandle(i, position.getX(), position.getY());
+        } else {
+            return null;
+        }
+    }
+    
+    public List<ObjectMouseHandle> getAllHandles() {
+        int count = getHandleCount();
+        List<ObjectMouseHandle> result = new ArrayList<ObjectMouseHandle>(count);
+        for (int i=0; i<count; ++i) {
+            result.add(getHandle(i));
+        }
+        return Collections.unmodifiableList(result);
+    }
+    
 }
