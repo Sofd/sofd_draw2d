@@ -53,10 +53,9 @@ public class DrawingObjectDrawingAdapter {
             }
 
             //... and a dashed rectangle around the object
-            g2d.transform(getViewer().getObjectToDisplayTransform());
-            // dash segment lengths scale with the transformation for now (they shouldn't)
             g2d.setStroke(new BasicStroke(0, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[]{2,4}, 0.0f));
-            g2d.draw(getDrawingObject().getBounds2D());
+            // transform the shape, not g2d, so the stroke (dash segment lenghts) isn't transformed as well
+            g2d.draw(getViewer().getObjectToDisplayTransform().createTransformedShape(getDrawingObject().getBounds2D()));
         }
     }
     
