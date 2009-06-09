@@ -22,7 +22,7 @@ import de.sofd.draw2d.EllipseObject;
 import de.sofd.draw2d.RectangleObject;
 import de.sofd.draw2d.event.DrawingListener;
 import de.sofd.draw2d.event.DrawingObjectAddOrMoveEvent;
-import de.sofd.draw2d.event.DrawingObjectLocationChangeEvent;
+import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.event.DrawingObjectRemoveEvent;
 import de.sofd.draw2d.viewer.event.DrawingViewerEvent;
 import de.sofd.draw2d.viewer.event.DrawingViewerListener;
@@ -134,17 +134,11 @@ public class DrawingViewer extends JPanel {
                 if (re.isBeforeChange()) {
                     removeFromSelection(re.getObject());
                     repaintObjectArea(re.getObject());
+                    objectDrawingAdapters.remove(re.getObject());
                 }
-            } else if (e instanceof DrawingObjectLocationChangeEvent) {  // TODO: DrawingObjectEvent subclasses should be handled by the adapters
-                DrawingObjectLocationChangeEvent lce = (DrawingObjectLocationChangeEvent) e;
-                /*
-                 * if this is a before-change notification event, the source
-                 * DrawingObject (lce.getSource()) is still located at its
-                 * original 2D position. Otherwise, it is already located at its
-                 * new position. In both cases, the area of the object needs to
-                 * be scheduled for repainting
-                 */
-                repaintObjectArea(lce.getSource());
+            } else if (e instanceof DrawingObjectEvent) {
+                DrawingObjectEvent de = (DrawingObjectEvent) e;
+                objectDrawingAdapters.get(de.getSource()).onDrawingObjectEvent(de);
             }
         }
     };
