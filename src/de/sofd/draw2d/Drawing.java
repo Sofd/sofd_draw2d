@@ -38,7 +38,7 @@ public class Drawing {
             drawingObjects.remove(oldIndex);
             drawingObjects.add(index, o);
             fireEvent(DrawingObjectAddOrMoveEvent.newAfterObjectMoveEvent(this, oldIndex, index));
-        } else {
+        } else if (oldIndex != index) {
             fireEvent(DrawingObjectAddOrMoveEvent.newBeforeObjectAddEvent(this, index));
             drawingObjects.add(index, o);
             o.addDrawingObjectListener(drawingObjectEventForwarder);
@@ -89,8 +89,8 @@ public class Drawing {
      *             if index is out of range
      */
     public void removeDrawingObject(int index) {
-        fireEvent(DrawingObjectRemoveEvent.newBeforeObjectRemoveEvent(this, index));
         DrawingObject o = get(index);
+        fireEvent(DrawingObjectRemoveEvent.newBeforeObjectRemoveEvent(this, index));
         drawingObjects.remove(index);
         o.removeDrawingObjectListener(drawingObjectEventForwarder);
         fireEvent(DrawingObjectRemoveEvent.newAfterObjectRemoveEvent(this, index));
