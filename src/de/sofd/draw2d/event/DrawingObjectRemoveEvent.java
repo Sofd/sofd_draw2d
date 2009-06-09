@@ -56,7 +56,7 @@ public class DrawingObjectRemoveEvent extends DrawingEvent {
      */
     public DrawingObject getObject() {
         if (!isBeforeChange) {
-            throw new IllegalStateException("can't determine to-be-added DrawingObject for a before-DrawingObjectAdd event");
+            throw new IllegalStateException("can't determine to-be-removed DrawingObject for an after-DrawingObjectRemove event");
         }
         return getSource().get(getIndex());
     }
