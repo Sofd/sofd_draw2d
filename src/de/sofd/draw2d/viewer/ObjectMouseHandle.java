@@ -13,7 +13,9 @@ import de.sofd.draw2d.DrawingObject;
  * object.
  * <p>
  * The {@link DrawingObjectDrawingAdapter} of a DrawingObject in a DrawingViewer
- * defines which handles the object has using its ....TODO method.
+ * defines which handles the object has using its
+ * {@link DrawingObjectDrawingAdapter#getHandleCount()} /
+ * {@link DrawingObjectDrawingAdapter#getHandle(int)} etc. methods.
  * 
  * @author olaf
  */
@@ -30,9 +32,9 @@ public class ObjectMouseHandle implements Serializable {
      *            id of the handle. Must be unique among all handles of the same
      *            DrawingObject in the same DrawingViewer
      * @param x
-     *            x coordinate of handle's position (in display coordinat space)
+     *            x coordinate of handle's position (in display coordinate space)
      * @param y
-     *            y coordinate of handle's position (in display coordinat space)
+     *            y coordinate of handle's position (in display coordinate space)
      */
     public ObjectMouseHandle(String id, double x, double y) {
         super();
@@ -44,7 +46,11 @@ public class ObjectMouseHandle implements Serializable {
     public String getId() {
         return id;
     }
-    
+
+    /**
+     * 
+     * @return x position of the handle in display coordinates
+     */
     public double getX() {
         return x;
     }
@@ -53,6 +59,10 @@ public class ObjectMouseHandle implements Serializable {
         this.x = x;
     }
 
+    /**
+     * 
+     * @return y position of the handle in display coordinates
+     */
     public double getY() {
         return y;
     }
@@ -61,6 +71,10 @@ public class ObjectMouseHandle implements Serializable {
         this.y = y;
     }
     
+    /**
+     * 
+     * @return position of the handle in display coordinates
+     */
     public Point2D getPosition() {
         return new Point2D.Double(x, y);
     }

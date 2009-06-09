@@ -115,5 +115,31 @@ public class DrawingObjectDrawingAdapter {
         }
         return Collections.unmodifiableList(result);
     }
+
+    /**
+     * Handle hit test.
+     * 
+     * @param x
+     *            x
+     * @param y
+     *            y
+     * @return {@link ObjectMouseHandle} located below (x,y) (display
+     *         coordinates). null if there's no handle there.
+     */
+    public ObjectMouseHandle getHandleAt(double x, double y) {
+        int count = getHandleCount();
+        for (int i=0; i<count; ++i) {
+            ObjectMouseHandle handle = getHandle(i);
+            if (hits(handle, x, y)) {
+                return handle;
+            }
+        }
+        return null;
+    }
+    
+    protected boolean hits(ObjectMouseHandle handle, double x, double y) {
+        return (Math.abs(handle.getX() - x) < HANDLE_BOX_WIDTH/2) &&
+               (Math.abs(handle.getY() - y) < HANDLE_BOX_WIDTH/2);
+    }
     
 }
