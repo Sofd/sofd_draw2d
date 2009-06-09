@@ -1,18 +1,25 @@
 package de.sofd.draw2d.viewer.test;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.HeadlessException;
+import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
+import javax.swing.JSpinner;
 import javax.swing.JToolBar;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.sofd.draw2d.Drawing;
+import de.sofd.draw2d.DrawingObject;
 import de.sofd.draw2d.viewer.DrawingViewer;
 
 public class ViewerDisplayFrame extends JFrame {
@@ -47,6 +54,24 @@ public class ViewerDisplayFrame extends JFrame {
                 zoomValueLabel.setText(""+zoomSlider.getValue()+"%");
                 double scale = (double)zoomSlider.getValue()/100;
                 drawingViewer.setObjectToDisplayTransform(AffineTransform.getScaleInstance(scale, scale));
+            }
+        });
+        toolbar.add(new JLabel("ObjNr:"));
+        final JSpinner objNrChooser = new JSpinner(new SpinnerNumberModel(0,0,100,1)) {
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(50, super.getMaximumSize().height);
+            }
+        };
+        toolbar.add(objNrChooser);
+        toolbar.add(new AbstractAction("toggleSel") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int nr = (Integer)objNrChooser.getValue();
+                if (nr >= 0 && nr < drawing.getObjectCount()) {
+                    DrawingObject drobj = drawing.get(nr);
+                    drawingViewer.toggleSelected(drobj);
+                }
             }
         });
 

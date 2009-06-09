@@ -20,8 +20,8 @@ public class EllipseObjectDrawingAdapter extends DrawingObjectDrawingAdapter {
     @Override
     public void paintObjectOn(Graphics2D g2d) {
         g2d.setPaint(Color.RED);
-        g2d.setStroke(new BasicStroke(0));
         g2d.transform(getViewer().getObjectToDisplayTransform());
+        g2d.setStroke(new BasicStroke(0));
         g2d.draw(getDrawingObject().getEllipse());
     }
 

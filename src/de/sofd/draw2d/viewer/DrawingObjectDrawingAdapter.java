@@ -1,5 +1,7 @@
 package de.sofd.draw2d.viewer;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
@@ -29,6 +31,16 @@ public class DrawingObjectDrawingAdapter {
         
     }
 
+    public void paintSelectionVisualizationOn(Graphics2D g2d, boolean isSelected) {
+        if (isSelected) {
+            g2d.setPaint(Color.GREEN);
+            g2d.transform(getViewer().getObjectToDisplayTransform());
+            // dash segment lengths scale with the transformation for now (they shouldn't)
+            g2d.setStroke(new BasicStroke(0, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f, new float[]{2,4}, 0.0f));
+            g2d.draw(getDrawingObject().getBounds2D());
+        }
+    }
+    
     public boolean objectOverlaps(Rectangle rect) {
         return true;  // TODO: real impl
     }

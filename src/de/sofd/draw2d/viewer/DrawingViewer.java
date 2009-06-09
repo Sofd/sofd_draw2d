@@ -197,6 +197,14 @@ public class DrawingViewer extends JPanel {
         removeFromSelection(Arrays.asList(new DrawingObject[]{drobj}));
     }
     
+    public void toggleSelected(DrawingObject drobj) {
+        if (isSelected(drobj)) {
+            removeFromSelection(drobj);
+        } else {
+            addToSelection(drobj);
+        }
+    }
+    
     public void clearSelection() {
         setSelection(new ArrayList<DrawingObject>());
     }
@@ -247,6 +255,14 @@ public class DrawingViewer extends JPanel {
             Rectangle clip = g2d.getClipBounds();
             if (clip != null && !drawingAdapter.objectOverlaps(clip)) { continue; }
             drawingAdapter.paintObjectOn((Graphics2D) g2d.create());
+        }
+        // paint the selection visualizations on top of all the objects' outlines themselves
+        for (DrawingObject drobj : drawing.getObjects()) {
+            DrawingObjectDrawingAdapter drawingAdapter = objectDrawingAdapters.get(drobj);
+            assert drawingAdapter != null;
+            Rectangle clip = g2d.getClipBounds();
+            if (clip != null && !drawingAdapter.objectOverlaps(clip)) { continue; }
+            drawingAdapter.paintSelectionVisualizationOn((Graphics2D) g2d.create(), isSelected(drobj));
         }
     }
 
