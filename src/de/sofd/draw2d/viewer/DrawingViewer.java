@@ -6,8 +6,13 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.EventObject;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JPanel;
@@ -20,6 +25,10 @@ import de.sofd.draw2d.event.DrawingListener;
 import de.sofd.draw2d.event.DrawingObjectAddOrMoveEvent;
 import de.sofd.draw2d.event.DrawingObjectLocationChangeEvent;
 import de.sofd.draw2d.event.DrawingObjectRemoveEvent;
+import de.sofd.draw2d.viewer.event.DrawingViewerEvent;
+import de.sofd.draw2d.viewer.event.DrawingViewerListener;
+import de.sofd.draw2d.viewer.event.DrawingViewerSelectionChangeEvent;
+import de.sofd.util.IdentityHashSet;
 
 public class DrawingViewer extends JPanel {
 
@@ -28,10 +37,29 @@ public class DrawingViewer extends JPanel {
     private Drawing drawing;
     private Map<DrawingObject, DrawingObjectDrawingAdapter> objectDrawingAdapters
         = new IdentityHashMap<DrawingObject, DrawingObjectDrawingAdapter>();
+    // invariant: selectedObjects is a subset of drawing.getObjects()
+    private Collection<DrawingObject> selectedObjects = new IdentityHashSet<DrawingObject>();
 
     private AffineTransform objectToDisplayTransform;
     private AffineTransform displayToObjectTransform;
 
+    private final List<DrawingViewerListener> drawingViewerListeners =
+        new ArrayList<DrawingViewerListener>();
+    
+    public void addDrawingViewerListener(DrawingViewerListener l) {
+        drawingViewerListeners.add(l);
+    }
+    
+    public void removeDrawingViewerListener(DrawingViewerListener l) {
+        drawingViewerListeners.remove(l);
+    }
+
+    protected void fireDrawingViewerEvent(DrawingViewerEvent e) {
+        for (DrawingViewerListener l : drawingViewerListeners) {
+            l.onDrawingViewerEvent(e);
+        }
+    }
+    
     public DrawingViewer() {
         setObjectToDisplayTransform(new AffineTransform());
     }
@@ -121,15 +149,85 @@ public class DrawingViewer extends JPanel {
         }
     };
 
+    public Collection<DrawingObject> getSelection() {
+        return new ArrayList<DrawingObject>(selectedObjects);
+    }
+    
+    public boolean isSelected(DrawingObject drobj) {
+        return selectedObjects.contains(drobj);
+    }
+    
+    public void setSelection(Collection<DrawingObject> drobjs) {
+        Collection<DrawingObject> toBeUnselected = new IdentityHashSet<DrawingObject>(selectedObjects);
+        toBeUnselected.removeAll(drobjs);
+        Collection<DrawingObject> toBeSelected = new IdentityHashSet<DrawingObject>(drobjs);
+        toBeSelected.removeAll(selectedObjects);
+        if (null != drawing) {
+            toBeSelected.retainAll(drawing.getObjects());
+        }
+        if (!toBeUnselected.isEmpty()) {
+            fireDrawingViewerEvent(DrawingViewerSelectionChangeEvent.newBeforeObjectRemoveEvent(this, toBeUnselected));
+            selectedObjects.removeAll(toBeUnselected);
+            repaintObjectAreas(toBeUnselected);
+            fireDrawingViewerEvent(DrawingViewerSelectionChangeEvent.newAfterObjectRemoveEvent(this, toBeUnselected));
+        }
+        if (!toBeSelected.isEmpty()) {
+            fireDrawingViewerEvent(DrawingViewerSelectionChangeEvent.newBeforeObjectAddEvent(this, toBeSelected));
+            selectedObjects.addAll(toBeSelected);
+            repaintObjectAreas(toBeSelected);
+            fireDrawingViewerEvent(DrawingViewerSelectionChangeEvent.newAfterObjectAddEvent(this, toBeSelected));
+        }
+    }
+
+    public void setSelection(DrawingObject drobj) {
+        setSelection(Arrays.asList(new DrawingObject[]{drobj}));
+    }
+
+    public void addToSelection(Collection<DrawingObject> drobjs) {
+        Collection<DrawingObject> newSelection = new IdentityHashSet<DrawingObject>(selectedObjects);
+        newSelection.addAll(drobjs);
+        setSelection(newSelection);
+    }
+    
+    public void addToSelection(DrawingObject drobj) {
+        addToSelection(Arrays.asList(new DrawingObject[]{drobj}));
+    }
+
+    public void removeFromSelection(Collection<DrawingObject> drobjs) {
+        Collection<DrawingObject> newSelection = new IdentityHashSet<DrawingObject>(selectedObjects);
+        newSelection.removeAll(drobjs);
+        setSelection(newSelection);
+    }
+
+    public void removeFromSelection(DrawingObject drobj) {
+        removeFromSelection(Arrays.asList(new DrawingObject[]{drobj}));
+    }
+    
+    public void clearSelection() {
+        setSelection(new ArrayList<DrawingObject>());
+    }
+    
+    public void selectAll() {
+        if (null != drawing) {
+            setSelection(drawing.getObjects());
+        }
+    }
+    
     /**
      * schedule repainting of the drawing area covered by dobj
      * 
      * @param dobj
      */
-    protected void repaintObjectArea(DrawingObject dobj) {
+    protected void repaintObjectArea(DrawingObject drobj) {
         repaint();  // TODO: real implementation
     }
 
+    protected void repaintObjectAreas(Collection<DrawingObject> drobjs) {
+        for (DrawingObject drobj : drobjs) {
+            repaintObjectArea(drobj);
+        }
+    }
+    
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D)g;
