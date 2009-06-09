@@ -59,10 +59,10 @@ public class DrawingListEditorFrame extends JFrame {
         abstract void actionPerformed(DrawingObject drobj);
     };
     
-    private static void mvLocPt3By(double dx, double dy, DrawingObject drobj) {
+    private static void mvLocPt2By(double dx, double dy, DrawingObject drobj) {
         Location loc = new Location(drobj.getLocation());
-        Point2D pt3 = loc.getPt3();
-        loc.setPt3(pt3.getX() + dx, pt3.getY() + dy);
+        Point2D pt2 = loc.getPt2();
+        loc.setPt2(pt2.getX() + dx, pt2.getY() + dy);
         drobj.setLocation(loc);
     }
     
@@ -102,28 +102,28 @@ public class DrawingListEditorFrame extends JFrame {
                 drobj.moveBy(0, -10);
             }
         });
-        toolbar.add(new SelectedObjectAction("x3+") {
+        toolbar.add(new SelectedObjectAction("x2+") {
             @Override
             void actionPerformed(DrawingObject drobj) {
-                mvLocPt3By(10, 0, drobj);
+                mvLocPt2By(10, 0, drobj);
             }
         });
-        toolbar.add(new SelectedObjectAction("x3-") {
+        toolbar.add(new SelectedObjectAction("x2-") {
             @Override
             void actionPerformed(DrawingObject drobj) {
-                mvLocPt3By(-10, 0, drobj);
+                mvLocPt2By(-10, 0, drobj);
             }
         });
-        toolbar.add(new SelectedObjectAction("y3+") {
+        toolbar.add(new SelectedObjectAction("y2+") {
             @Override
             void actionPerformed(DrawingObject drobj) {
-                mvLocPt3By(0, 10, drobj);
+                mvLocPt2By(0, 10, drobj);
             }
         });
-        toolbar.add(new SelectedObjectAction("y3-") {
+        toolbar.add(new SelectedObjectAction("y2-") {
             @Override
             void actionPerformed(DrawingObject drobj) {
-                mvLocPt3By(0, -10, drobj);
+                mvLocPt2By(0, -10, drobj);
             }
         });
         toolbar.add(new SelectedObjectAction("z+") {
