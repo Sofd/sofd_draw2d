@@ -8,14 +8,15 @@ import java.util.List;
 import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.event.DrawingObjectListener;
 import de.sofd.draw2d.event.DrawingObjectLocationChangeEvent;
+import de.sofd.draw2d.viewer.DrawingViewer;
 
 /**
  * Base class for vector drawing objects that live in an infinite, continuous,
  * 2-dimensional cartesian coordinate system with double-valued x- and y-axes.
  * <p>
  * No drawing code in here or in any subclasses, no dependency on any GUI or
- * drawing toolkits. For displaying DrawingObjects, add them to a Drawing and
- * display that using a DrawingViewer.
+ * drawing toolkits. For displaying DrawingObjects, add them to a
+ * {@link Drawing} and display that using a {@link DrawingViewer}.
  * 
  * @author olaf
  */
@@ -35,7 +36,7 @@ public abstract class DrawingObject {
      * @return current 2D location of this object, as a rectangular bounding box
      */
     public Location getLocation() {
-        return location;
+        return new Location(location);
     }
 
     /**
@@ -68,6 +69,16 @@ public abstract class DrawingObject {
         setLocation(new Location(x1, y1, x2, y2));
     }
     
+    public Point2D getLocationPt(int n) {
+        return location.getPt(n);
+    }
+    
+    public void setLocationPt(int n, Point2D pt) {
+        Location newLoc = new Location(location);
+        newLoc.setPt(n, pt);
+        setLocation(newLoc);
+    }
+
     public void moveBy(double dx, double dy) {
         Location newLoc = new Location(location);
         newLoc.moveBy(dx, dy);

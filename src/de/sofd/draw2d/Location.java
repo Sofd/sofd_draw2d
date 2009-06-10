@@ -95,6 +95,25 @@ public class Location {
         }
     }
     
+    public void setPt(int n, Point2D newPt) {
+        switch(n) {
+        case 0:
+            setPt0(newPt.getX(), newPt.getY());
+            break;
+        case 1:
+            setPt1(newPt.getX(), newPt.getY());
+            break;
+        case 2:
+            setPt2(newPt.getX(), newPt.getY());
+            break;
+        case 3:
+            setPt3(newPt.getX(), newPt.getY());
+            break;
+        default:
+            throw new IndexOutOfBoundsException("Location point idx not in [0..3]: " + n);
+        }
+    }
+    
     public Rectangle2D getBounds2D() {
         return new Rectangle2D.Double(x1 < x2 ? x1 : x2,
                                       y1 < y2 ? y1 : y2,

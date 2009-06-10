@@ -6,6 +6,7 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,6 +30,50 @@ import de.sofd.draw2d.viewer.event.DrawingViewerListener;
 import de.sofd.draw2d.viewer.event.DrawingViewerSelectionChangeEvent;
 import de.sofd.util.IdentityHashSet;
 
+/**
+ * Viewer and interactive editor of a {@link Drawing}.
+ * <p>
+ * Holds a transformation (affine transform) that's used for converting object
+ * coordinates into pixel coordinates and back (
+ * {@link #getObjectToDisplayTransform()},
+ * {@link #setObjectToDisplayTransform(AffineTransform)}).
+ * <p>
+ * Listens to change events of its Drawing, changes to the transformation etc.,
+ * redraws its display accordingly
+ * <p>
+ * Manages the "current selection", i.e. the (possibly empty) subset of the
+ * drawing's DrawingObjects that are currently "selected"
+ * <p>
+ * Delegates drawing of the DrawingObjects (including visual feedback of
+ * "selected" state etc.) and mouse "hit testing" etc. to special per-object
+ * "drawing adapters", which are instances of subclasses of
+ * {@link DrawingObjectDrawingAdapter}: There is one such adapter per
+ * DrawingObject in the Drawing; the adapter knows its DrawingObject.
+ * <p>
+ * Fires its own set of events (subclasses of {@link DrawingViewerEvent} for
+ * events that are specific to the viewer (rather than the drawing or the
+ * DrawingObjects in it). At the moment, this is used for signalling changes to
+ * the DrawingViewer's selection (see DrawingViewerSelectionChangeEvent).
+ * <p>
+ * It is supported to have more than one DrawingViewer on the same drawing, all
+ * interoperating seamlessly.
+ * <p>
+ * To support interactive editing of the drawing by the user through the viewer,
+ * a <strong>tool</strong> (instance of a subclass of {@link DrawingViewerTool})
+ * must be activated on it using the {@link #activateTool(DrawingViewerTool)}.
+ * At most one tool can be associated with a DrawingViewer, but this tool may be
+ * changed at any time by again calling {@link #activateTool(DrawingViewerTool)}
+ * . Thus, a simple "vector graphics program" can be written by just creating a
+ * Drawing, writing a simple GUI that contains a viewer (or multiple viewers) of
+ * that drawing, and providing simple means for the user to interactively
+ * activate different tools on the viewer.
+ * <p>
+ * A DrawingViewer can also be used to provide just a viewer for a Drawing and
+ * not ever activating a tool on the viewer. That way, changes to the drawing
+ * may only be done programmatically.
+ * 
+ * @author Olaf Klischat
+ */
 public class DrawingViewer extends JPanel {
 
     private static final long serialVersionUID = -5162812267404406219L;
@@ -86,6 +131,14 @@ public class DrawingViewer extends JPanel {
         return displayToObjectTransform;
     }
     
+    public Point2D objToDisplay(Point2D pt) {
+        return getObjectToDisplayTransform().transform(pt, null);
+    }
+    
+    public Point2D displayToObj(Point2D pt) {
+        return getDisplayToObjectTransform().transform(pt, null);
+    }
+
     public void setDrawing(Drawing d) {
         if (null != this.drawing) {
             this.drawing.removeDrawingListener(drawingEventHandler);
@@ -213,6 +266,31 @@ public class DrawingViewer extends JPanel {
         if (null != drawing) {
             setSelection(drawing.getObjects());
         }
+    }
+
+    private DrawingViewerTool currentTool;
+    
+    public void activateTool(DrawingViewerTool t) {
+        if (null == t) {
+            deactivateCurrentTool();
+            return;
+        }
+        if (t.getAssociatedViewer() != null) {
+            if (t.getAssociatedViewer() == this) { return; }
+            t.getAssociatedViewer().deactivateCurrentTool();
+        }
+        if (null != currentTool) {
+            deactivateCurrentTool();
+        }
+        currentTool = t;
+        t.associateWithViewer(this);
+    }
+
+    public void deactivateCurrentTool() {
+        if (null != currentTool) {
+            currentTool.disassociateFromViewer();
+        }
+        currentTool = null;
     }
     
     /**

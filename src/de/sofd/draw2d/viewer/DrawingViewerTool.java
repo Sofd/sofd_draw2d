@@ -53,14 +53,18 @@ public abstract class DrawingViewerTool implements MouseInputListener, MouseWhee
      * {@link DrawingViewerTool} to inherit this behaviour).
      * <p>
      * <strong>Caution: </strong> Do not call this method yourself; the
-     * DrawingViewer calls it when a tool is being associated with it.
+     * DrawingViewer calls it when a tool is being associated with it. To
+     * associate a tool with a viewer, clients must call
+     * {@link DrawingViewer#activateTool(DrawingViewerTool)}.
      * <p>
      * DrawingViewerTool's implementation stores the viewer in an internal field
      * that's returned by {@link #getAssociatedViewer()} (so the contract
      * specified above is fulfilled). When overriding, make sure to first call
      * the super implementation to inherit this behaviour.
      * 
-     * @param viewer the {@link DrawingViewer} that this tool is being associated with.
+     * @param viewer
+     *            the {@link DrawingViewer} that this tool is being associated
+     *            with.
      */
     protected void associateWithViewer(DrawingViewer viewer) {
         this.associatedViewer = viewer;
@@ -82,7 +86,8 @@ public abstract class DrawingViewerTool implements MouseInputListener, MouseWhee
      * <p>
      * <strong>Caution: </strong> Do not call this method yourself; the
      * DrawingViewer calls it when its current tool is being disassociated from
-     * it.
+     * it. To disassociate a viewer's current tool from the viewer, clients must
+     * call {@link DrawingViewer#deactivateCurrentTool()}.
      * <p>
      * DrawingViewerTool's implementation clears the internal field that's
      * returned by {@link #getAssociatedViewer()}, such that the latter returns
