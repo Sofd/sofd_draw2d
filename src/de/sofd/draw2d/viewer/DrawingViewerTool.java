@@ -72,9 +72,9 @@ public abstract class DrawingViewerTool implements MouseInputListener, MouseWhee
 
     /**
      * Called by the {@link #getAssociatedViewer()} when this DrawingViewerTool
-     * is being disassociated from the {@link DrawingViewer}. May be called
-     * multiple times (the same tool may be associated/disassociated with the
-     * same or different viewers at any time).
+     * is being disassociated from the {@link #getAssociatedViewer()}. May be
+     * called multiple times (the same tool may be associated/disassociated with
+     * the same or different viewers at any time).
      * <p>
      * Implementation must make sure that {@link #getAssociatedViewer()} returns
      * null immediately after this method was called (derive from
@@ -94,6 +94,14 @@ public abstract class DrawingViewerTool implements MouseInputListener, MouseWhee
      * null afterwards (as required by the contract specified above). When
      * overriding, make sure to first call the super implementation to inherit
      * this behaviour.
+     * <p>
+     * This method will also be called if somebody calls
+     * {@link DrawingViewer#activateTool(DrawingViewerTool)} on a viewer which
+     * already had a different tool activated on it. In that case, the previous
+     * tool will be disassociated, and the new tool activated immediately
+     * afterwards, with both this method and
+     * {@link #associateWithViewer(DrawingViewer)} (on the new tool) correctly
+     * being called successively.
      */
     protected void disassociateFromViewer() {
         this.associatedViewer = null;
