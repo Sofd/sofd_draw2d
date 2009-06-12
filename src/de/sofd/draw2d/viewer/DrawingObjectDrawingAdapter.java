@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,11 +61,50 @@ public class DrawingObjectDrawingAdapter {
             g2d.draw(getViewer().getObjectToDisplayTransform().createTransformedShape(getDrawingObject().getBounds2D()));
         }
     }
-    
-    public boolean objectOverlaps(Rectangle rect) {
-        return true;  // TODO: real impl
+
+    /**
+     * Tell whether the given rectangle intersects this adapter's DrawingObject,
+     * in display coordinates. Default implementation tests whether the rect
+     * intersects with the {@link #getBounds2DDisp()}. Used to decide whether
+     * the object needs redrawing, given a specific invalidated area.
+     * 
+     * @param rect
+     * @return
+     */
+    public boolean intersectsDisp(Rectangle2D rect) {
+        return rect.intersects(getBounds2DDisp());
     }
 
+    /**
+     * Returns a rectangle in display coordinates that marks the outline of an
+     * area outside of which no drawing operations by this adapter should take
+     * place. Used by {@link #intersectsDisp(Rectangle2D)} for now. Default
+     * implementation returns the object's bounding box (
+     * {@link DrawingObject#getBounds2D()}), transformed to display coordinates
+     * and extended such that any MouseHandles that might be drawn on the edge
+     * of the bounding box will still lie completely inside the returned
+     * rectangle. If you define handles outside that area, override this method
+     * (or just override {@link #intersectsDisp(Rectangle2D)} to always return
+     * true, if that doesn't hinder performance too much). If the returned
+     * rectangle is too small, you might see artifacts.
+     * 
+     * @return
+     */
+    public Rectangle2D getBounds2DDisp() {
+        Rectangle result = getViewer().getObjectToDisplayTransform()
+                                            .createTransformedShape(getDrawingObject().getBounds2D())
+                                                .getBounds();
+        result.setRect(result.getMinX() - HANDLE_BOX_WIDTH/2 - 1,
+                       result.getMinY() - HANDLE_BOX_WIDTH/2 - 1,
+                       result.getWidth() + HANDLE_BOX_WIDTH + 1,
+                       result.getHeight() + HANDLE_BOX_WIDTH + 1);
+        return result;
+    }
+    
+    protected void scheduleSelfRepaint() {
+        viewer.repaintObjectArea(drawingObject);
+    }
+    
     /**
      * Callback that's called by the viewer if any {@link DrawingObjectEvent}
      * has occured on this adapter's DrawingObject. By default, just schedule a
@@ -79,7 +119,7 @@ public class DrawingObjectDrawingAdapter {
          * its new position. In both cases, the area of the object needs to be
          * scheduled for repainting
          */
-        viewer.repaintObjectArea(drawingObject);
+        scheduleSelfRepaint();
     }
 
     /**

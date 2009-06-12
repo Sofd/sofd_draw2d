@@ -10,6 +10,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -224,8 +225,8 @@ public class DrawingViewer extends JPanel {
                     repaintObjectArea(de.getObject());
                 } else if (!de.isMoved() && de.isAfterChange()) {
                     // new DrawingObject added to our drawing => create corresponding adapter, schedule repainting of affected area
-                    repaintObjectArea(de.getObject());
                     objectDrawingAdapters.put(de.getObject(), createDrawingAdapterFor(de.getObject()));
+                    repaintObjectArea(de.getObject());
                 }
             } else if (e instanceof DrawingObjectRemoveEvent) {
                 DrawingObjectRemoveEvent re = (DrawingObjectRemoveEvent) e;
@@ -407,7 +408,8 @@ public class DrawingViewer extends JPanel {
      * @param dobj
      */
     protected void repaintObjectArea(DrawingObject drobj) {
-        repaint();  // TODO: real implementation
+        Rectangle bounds = getDrawingAdapterFor(drobj).getBounds2DDisp().getBounds();
+        repaint(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
     protected void repaintObjectAreas(Collection<DrawingObject> drobjs) {
@@ -440,7 +442,7 @@ public class DrawingViewer extends JPanel {
             DrawingObjectDrawingAdapter drawingAdapter = objectDrawingAdapters.get(drobj);
             assert drawingAdapter != null;
             Rectangle clip = g2d.getClipBounds();
-            if (clip != null && !drawingAdapter.objectOverlaps(clip)) { continue; }
+            if (clip != null && !drawingAdapter.intersectsDisp(clip)) { continue; }
             drawingAdapter.paintObjectOn((Graphics2D) g2d.create());
         }
         // paint the selection visualizations on top of all the objects' outlines themselves
@@ -448,7 +450,7 @@ public class DrawingViewer extends JPanel {
             DrawingObjectDrawingAdapter drawingAdapter = objectDrawingAdapters.get(drobj);
             assert drawingAdapter != null;
             Rectangle clip = g2d.getClipBounds();
-            if (clip != null && !drawingAdapter.objectOverlaps(clip)) { continue; }
+            if (clip != null && !drawingAdapter.intersectsDisp(clip)) { continue; }
             drawingAdapter.paintSelectionVisualizationOn((Graphics2D) g2d.create(), isSelected(drobj));
         }
     }
