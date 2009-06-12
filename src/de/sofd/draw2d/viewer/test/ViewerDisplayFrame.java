@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
@@ -21,6 +20,7 @@ import javax.swing.event.ChangeListener;
 import de.sofd.draw2d.Drawing;
 import de.sofd.draw2d.DrawingObject;
 import de.sofd.draw2d.viewer.DrawingViewer;
+import de.sofd.draw2d.viewer.SelectorTool;
 
 public class ViewerDisplayFrame extends JFrame {
 
@@ -81,6 +81,7 @@ public class ViewerDisplayFrame extends JFrame {
     
     public void setDrawing(Drawing d) {
         drawingViewer.setDrawing(d);
+        drawingViewer.activateTool(new SelectorTool());
         this.drawing = d;
     }
 

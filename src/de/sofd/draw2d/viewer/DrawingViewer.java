@@ -4,6 +4,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
@@ -16,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JPanel;
+import javax.swing.event.MouseInputListener;
 
 import de.sofd.draw2d.Drawing;
 import de.sofd.draw2d.DrawingObject;
@@ -106,6 +110,9 @@ public class DrawingViewer extends JPanel {
     
     public DrawingViewer() {
         setObjectToDisplayTransform(new AffineTransform());
+        this.addMouseListener(toolMouseForwarder);
+        this.addMouseMotionListener(toolMouseForwarder);
+        this.addMouseWheelListener(toolMouseForwarder);
     }
     
     public DrawingViewer(Drawing drawing) {
@@ -141,6 +148,7 @@ public class DrawingViewer extends JPanel {
 
     public void setDrawing(Drawing d) {
         if (null != this.drawing) {
+            deactivateCurrentTool();
             this.drawing.removeDrawingListener(drawingEventHandler);
             this.objectDrawingAdapters.clear();
         }
@@ -154,7 +162,36 @@ public class DrawingViewer extends JPanel {
         repaint();
     }
 
+    public Drawing getDrawing() {
+        return drawing;
+    }
     
+    protected void checkDrawingSet() {
+        if (null == drawing) {
+            throw new IllegalStateException("no Drawing associated with this DrawingVieweriewer");
+        }
+    }
+    
+    public List<DrawingObject> getDrawingObjectsAtObjCoord(Point2D pt) {
+        checkDrawingSet();
+        return drawing.getDrawingObjectsAt(pt);
+    }
+
+    public DrawingObject getTopmostDrawingObjectAtObjCoord(Point2D pt) {
+        checkDrawingSet();
+        return drawing.getTopmostDrawingObjectAt(pt);
+    }
+
+    public List<DrawingObject> getDrawingObjectsAtDispCoord(Point2D pt) {
+        checkDrawingSet();
+        return drawing.getDrawingObjectsAt(displayToObj(pt));
+    }
+
+    public DrawingObject getTopmostDrawingObjectAtDispCoord(Point2D pt) {
+        checkDrawingSet();
+        return drawing.getTopmostDrawingObjectAt(displayToObj(pt));
+    }
+
     protected DrawingObjectDrawingAdapter createDrawingAdapterFor(DrawingObject drobj) {
         /*
          * TODO: use externally configurable DrawingObject class => adapter
@@ -169,6 +206,10 @@ public class DrawingViewer extends JPanel {
         }
     }
 
+    public DrawingObjectDrawingAdapter getDrawingAdapterFor(DrawingObject drobj) {
+        return objectDrawingAdapters.get(drobj);
+    }
+    
     private DrawingListener drawingEventHandler = new DrawingListener() {
         @Override
         public void onDrawingEvent(EventObject e) {
@@ -275,6 +316,7 @@ public class DrawingViewer extends JPanel {
             deactivateCurrentTool();
             return;
         }
+        checkDrawingSet();
         if (t.getAssociatedViewer() != null) {
             if (t.getAssociatedViewer() == this) { return; }
             t.getAssociatedViewer().deactivateCurrentTool();
@@ -291,6 +333,68 @@ public class DrawingViewer extends JPanel {
             currentTool.disassociateFromViewer();
         }
         currentTool = null;
+    }
+    
+    private ToolMouseForwarder toolMouseForwarder = new ToolMouseForwarder();
+    
+    private class ToolMouseForwarder implements MouseInputListener, MouseWheelListener {
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            if (null != currentTool) {
+                currentTool.mouseClicked(e);
+            }
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            if (null != currentTool) {
+                currentTool.mouseEntered(e);
+            }
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            if (null != currentTool) {
+                currentTool.mouseExited(e);
+            }
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            if (null != currentTool) {
+                currentTool.mousePressed(e);
+            }
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            if (null != currentTool) {
+                currentTool.mouseReleased(e);
+            }
+        }
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            if (null != currentTool) {
+                currentTool.mouseDragged(e);
+            }
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            if (null != currentTool) {
+                currentTool.mouseMoved(e);
+            }
+        }
+
+        @Override
+        public void mouseWheelMoved(MouseWheelEvent e) {
+            if (null != currentTool) {
+                currentTool.mouseWheelMoved(e);
+            }
+        }
+        
     }
     
     /**

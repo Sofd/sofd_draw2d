@@ -1,5 +1,6 @@
 package de.sofd.draw2d;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
@@ -122,7 +123,45 @@ public class Drawing {
         result.addAll(drawingObjects);
         return result;
     }
-    
+
+    /**
+     * 
+     * @param pt
+     *            pt
+     * @return list of all DrawingObjects located under pt, in z order (topmost
+     *         object first)
+     */
+    public List<DrawingObject> getDrawingObjectsAt(Point2D pt) {
+        List<DrawingObject> result = new ArrayList<DrawingObject>();
+        int count = drawingObjects.size();
+        for (int i = count-1; i >=0; i--) {
+            DrawingObject drobj = drawingObjects.get(i);
+            if (drobj.contains(pt)) {
+                result.add(drobj);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 
+     * @param pt
+     *            pt
+     * @return topmost DrawingObject located under pt. null if there is no
+     *         DrawingObject there.
+     */
+    public DrawingObject getTopmostDrawingObjectAt(Point2D pt) {
+        List<DrawingObject> result = new ArrayList<DrawingObject>();
+        int count = drawingObjects.size();
+        for (int i = count-1; i >=0; i--) {
+            DrawingObject drobj = drawingObjects.get(i);
+            if (drobj.contains(pt)) {
+                return drobj;
+            }
+        }
+        return null;
+    }
+
     private final List<DrawingListener> drawingListeners =
         new ArrayList<DrawingListener>();
     

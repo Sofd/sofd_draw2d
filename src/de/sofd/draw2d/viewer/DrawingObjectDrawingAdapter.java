@@ -19,7 +19,7 @@ public class DrawingObjectDrawingAdapter {
     private final DrawingViewer viewer;
     private final DrawingObject drawingObject;
 
-    public static final int HANDLE_BOX_WIDTH = 5;
+    public static final int HANDLE_BOX_WIDTH = 6;
     
     public DrawingObjectDrawingAdapter(DrawingViewer viewer, DrawingObject drawingObject) {
         this.viewer = viewer;
@@ -109,22 +109,12 @@ public class DrawingObjectDrawingAdapter {
             return nr;
         }
         @Override
-        public double getX() {
-            return getDrawingObject().getLocation().getPt(nr).getX();
+        public Point2D getPosition() {
+            return getDrawingObject().getLocation().getPt(nr);
         }
         @Override
-        public double getY() {
-            return getDrawingObject().getLocation().getPt(nr).getY();
-        }
-        @Override
-        public void setX(double x) {
-            Point2D newpt = getDrawingObject().getLocationPt(nr);
-            newpt.setLocation(x, newpt.getY());
-        }
-        @Override
-        public void setY(double y) {
-            Point2D newpt = getDrawingObject().getLocationPt(nr);
-            newpt.setLocation(newpt.getX(), y);
+        public void setPosition(Point2D posn) {
+            getDrawingObject().setLocationPt(nr, posn);
         }
     }
     
@@ -172,9 +162,14 @@ public class DrawingObjectDrawingAdapter {
         return null;
     }
     
+    public MouseHandle getHandleAt(Point2D pt) {
+        return getHandleAt(pt.getX(), pt.getY());
+    }
+    
     protected boolean hits(MouseHandle handle, double x, double y) {
-        return (Math.abs(handle.getX() - x) < HANDLE_BOX_WIDTH/2) &&
-               (Math.abs(handle.getY() - y) < HANDLE_BOX_WIDTH/2);
+        Point2D handlePosnDisp = getViewer().objToDisplay(handle.getPosition());
+        return (Math.abs(handlePosnDisp.getX() - x) < HANDLE_BOX_WIDTH/2) &&
+               (Math.abs(handlePosnDisp.getY() - y) < HANDLE_BOX_WIDTH/2);
     }
     
 }

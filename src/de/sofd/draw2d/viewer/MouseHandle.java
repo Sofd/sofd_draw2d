@@ -17,13 +17,17 @@ import de.sofd.draw2d.DrawingObject;
  * {@link DrawingObjectDrawingAdapter#getHandleCount()} /
  * {@link DrawingObjectDrawingAdapter#getHandle(int)} etc. methods.
  * <p>
- * This is an abstract base class. Subclasses must as least implement the
- * {@link #getX()}, {@link #setX(double)}, {@link #getY()},
- * {@link #setY(double)} methods with code that gets/sets the handle's position
- * (in object coordinates), normally modifying the DrawingObject in the process.
- * Example: A handle representing a specific vertice of some polygon
- * DrawingObject would implement these methode with code that gets and sets that
- * vertice's position.
+ * This is an abstract base class. Subclasses must as least implement either the
+ * get/setPosition() methods or the get/setX/Y() methods methods with code that
+ * gets/sets the handle's position (in object coordinates), normally modifying
+ * the DrawingObject in the process. Example: A handle representing a specific
+ * vertice of some polygon DrawingObject would implement these methods with code
+ * that gets and sets that vertice's position.
+ * <p>
+ * In the default implementation, get/setPosition() are implemented in terms of
+ * get/SetX/Y, and vice versa. Thus you have to override at least one of the two
+ * sets of methods or you'll get an endless recursion upon calling any of the
+ * methods.
  * <p>
  * Please note that the position setter methods may be implemented to not
  * actually set the handle to the position specified (e.g., after calling
@@ -79,28 +83,53 @@ public abstract class MouseHandle implements Serializable {
 
     /**
      * 
-     * @return x position of the handle in display coordinates
+     * @return x position of the handle (in object coordinates -- there's no viewer associated with this class)
      */
-    public abstract double getX();
+    public double getX() {
+        return getPosition().getX();
+    }
 
-    public abstract void setX(double x);
+    /**
+     * Set x coordinate of the handle's position. Default implementation calls
+     * {@link #setPosition(Point2D)}, whose default implementation in turn calls
+     * setX/Y. So you'll have to override at least one of the two sets of
+     * methods.
+     * 
+     * @param x
+     *            x
+     */
+    public void setX(double x) {
+        setPosition(new Point2D.Double(x, getPosition().getY()));
+    }
 
     /**
      * 
-     * @return y position of the handle in display coordinates
+     * @return y position of the handle (in object coordinates -- there's no viewer associated with this class)
      */
-    public abstract double getY();
+    public double getY() {
+        return getPosition().getY();
+    }
 
-    public abstract void setY(double y);
+    public void setY(double y) {
+        setPosition(new Point2D.Double(getPosition().getX(), y));
+    }
     
     /**
      * 
-     * @return position of the handle in display coordinates
+     * @return position of the handle (in object coordinates -- there's no viewer associated with this class)
      */
     public Point2D getPosition() {
         return new Point2D.Double(getX(), getY());
     }
 
+    /**
+     * Set the position of the handle to posn. Default implementation calls
+     * setX/Y, whose default implementation in turn calls setPosition. So you'll
+     * have to override at least one of the two sets of methods.
+     * 
+     * @param posn
+     *            posn
+     */
     public void setPosition(Point2D posn) {
         setX(posn.getX());
         setY(posn.getY());
