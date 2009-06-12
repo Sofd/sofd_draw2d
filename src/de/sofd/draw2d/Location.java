@@ -20,6 +20,10 @@ public class Location {
     
     private double x1, y1, x2, y2;
 
+    public Location() {
+        x1 = y1 = x2 = y2 = 0.0;
+    }
+    
     /**
      * Create new Location object, specifying two diagonally arranged corner
      * points, with pt0 = (x1,y1), and pt2 = (x2,y2)
@@ -38,6 +42,11 @@ public class Location {
         this.y1 = y1;
         this.x2 = x2;
         this.y2 = y2;
+    }
+    
+    public Location(Point2D pt0, Point2D pt2) {
+        setPt(0, pt0);
+        setPt(2, pt2);
     }
     
     public Location(Location other) {
