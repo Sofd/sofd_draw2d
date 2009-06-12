@@ -20,6 +20,9 @@ import javax.swing.event.ChangeListener;
 import de.sofd.draw2d.Drawing;
 import de.sofd.draw2d.DrawingObject;
 import de.sofd.draw2d.viewer.DrawingViewer;
+import de.sofd.draw2d.viewer.EllipseTool;
+import de.sofd.draw2d.viewer.ObjectCreatorByBBoxTool;
+import de.sofd.draw2d.viewer.RectangleTool;
 import de.sofd.draw2d.viewer.SelectorTool;
 
 public class ViewerDisplayFrame extends JFrame {
@@ -82,6 +85,8 @@ public class ViewerDisplayFrame extends JFrame {
     public void setDrawing(Drawing d) {
         drawingViewer.setDrawing(d);
         drawingViewer.activateTool(new SelectorTool());
+        //drawingViewer.activateTool(new EllipseTool());
+        //drawingViewer.activateTool(new RectangleTool());
         this.drawing = d;
     }
 

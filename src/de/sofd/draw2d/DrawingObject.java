@@ -69,6 +69,10 @@ public abstract class DrawingObject {
         setLocation(new Location(x1, y1, x2, y2));
     }
     
+    public void setLocation(Point2D pt0, Point2D pt2) {
+        setLocation(new Location(pt0, pt2));
+    }
+    
     public Point2D getLocationPt(int n) {
         return location.getPt(n);
     }
