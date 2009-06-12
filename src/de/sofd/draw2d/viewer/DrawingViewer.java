@@ -10,6 +10,9 @@ import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,6 +21,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
@@ -425,6 +429,7 @@ public class DrawingViewer extends JPanel {
             Graphics2D userGraphics = (Graphics2D)g2d.create();
             Insets borderInsets = getInsets();
             userGraphics.transform(AffineTransform.getTranslateInstance(borderInsets.left, borderInsets.top));
+            renderImage(userGraphics);
             renderDrawing(userGraphics);
         }
     }
@@ -448,4 +453,25 @@ public class DrawingViewer extends JPanel {
         }
     }
 
+
+    // rendering of test image for performance analysis
+    
+    private BufferedImage backgroundImage;
+    private boolean backgroundImageFailedToLoad = false;
+    
+    protected void renderImage(Graphics2D g2d) {
+        if (backgroundImageFailedToLoad) { return; }
+        if (null == backgroundImage) {
+            try {
+                backgroundImage = ImageIO.read(this.getClass().getResourceAsStream("test/mri_brain.jpg"));
+            } catch (Exception e) {
+                System.err.println("failed to load DrawingViewer test background image");
+                e.printStackTrace();
+                backgroundImageFailedToLoad = true;
+            }
+        }
+        BufferedImageOp scaleImageOp = new AffineTransformOp(getObjectToDisplayTransform(), AffineTransformOp.TYPE_BILINEAR);
+        g2d.drawImage(backgroundImage, scaleImageOp, 0, 0);
+    }
+    
 }
