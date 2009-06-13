@@ -42,27 +42,38 @@ import de.sofd.util.IdentityHashSet;
 /**
  * Viewer and interactive editor of a {@link Drawing}.
  * <p>
- * Holds a transformation (affine transform) that's used for converting object
- * coordinates into pixel coordinates and back (
- * {@link #getObjectToDisplayTransform()},
- * {@link #setObjectToDisplayTransform(AffineTransform)}).
+ * Two coordinate systems are involved when drawing the {@link DrawingObject}s
+ * in the Drawing: The system in which the objects live (i.e. the system in
+ * which their locations/bounding box corners, vertex points etc. are specified)
+ * is called the <strong>object coordinate system</strong>. The system in which
+ * the viewer's graphical output takes place is called the <strong>display
+ * coordinate system</strong>. The DrawingViewer holds a modifiable
+ * transformation ({@link AffineTransform}) that's used for converting between
+ * those two systems; see {@link #getObjectToDisplayTransform()},
+ * {@link #setObjectToDisplayTransform(AffineTransform)}),
+ * {@link #getDisplayToObjectTransform()}. Initially this is set to the identity
+ * transformation, but it may be changed at any time and the viewer will update
+ * its display accordingly.
  * <p>
- * Listens to change events of its Drawing, changes to the transformation etc.,
- * redraws its display accordingly
+ * The DrawingViewer listens to change events of its Drawing, changes to the
+ * transformation etc., and redraws its display accordingly.
  * <p>
- * Manages the "current selection", i.e. the (possibly empty) subset of the
- * drawing's DrawingObjects that are currently "selected"
+ * It manages a selection, which is defined as the (possibly empty) subset of
+ * the drawing's DrawingObjects that are currently "selected" in this viewer.
+ * (you can have more than one viewer on the same drawing, in which case each
+ * viewer will have its own selection)
  * <p>
- * Delegates drawing of the DrawingObjects (including visual feedback of
+ * It delegates drawing of the DrawingObjects (including visual feedback of
  * "selected" state etc.) and mouse "hit testing" etc. to special per-object
  * "drawing adapters", which are instances of subclasses of
  * {@link DrawingObjectDrawingAdapter}: There is one such adapter per
  * DrawingObject in the Drawing; the adapter knows its DrawingObject.
  * <p>
- * Fires its own set of events (subclasses of {@link DrawingViewerEvent} for
- * events that are specific to the viewer (rather than the drawing or the
- * DrawingObjects in it). At the moment, this is used for signalling changes to
- * the DrawingViewer's selection (see DrawingViewerSelectionChangeEvent).
+ * A DrawingViewer fires its own set of events (subclasses of
+ * {@link DrawingViewerEvent}) for events that are specific to the viewer
+ * (rather than the drawing or the DrawingObjects in it). At the moment, this is
+ * used for signalling changes to the DrawingViewer's selection (see
+ * {@link DrawingViewerSelectionChangeEvent}).
  * <p>
  * It is supported to have more than one DrawingViewer on the same drawing, all
  * interoperating seamlessly.
@@ -70,16 +81,17 @@ import de.sofd.util.IdentityHashSet;
  * To support interactive editing of the drawing by the user through the viewer,
  * a <strong>tool</strong> (instance of a subclass of {@link DrawingViewerTool})
  * must be activated on it using the {@link #activateTool(DrawingViewerTool)}.
- * At most one tool can be associated with a DrawingViewer, but this tool may be
- * changed at any time by again calling {@link #activateTool(DrawingViewerTool)}
- * . Thus, a simple "vector graphics program" can be written by just creating a
- * Drawing, writing a simple GUI that contains a viewer (or multiple viewers) of
- * that drawing, and providing simple means for the user to interactively
- * activate different tools on the viewer.
+ * At most one tool can be associated with a DrawingViewer at a time, but this
+ * tool may be changed at any time by again calling
+ * {@link #activateTool(DrawingViewerTool)} . Thus, a simple
+ * "vector graphics program" can be written by just creating a Drawing, writing
+ * a simple GUI that contains a viewer (or multiple viewers) of that drawing,
+ * and providing simple means for the user to interactively activate different
+ * tools on the viewer.
  * <p>
- * A DrawingViewer can also be used to provide just a viewer for a Drawing and
- * not ever activating a tool on the viewer. That way, changes to the drawing
- * may only be done programmatically.
+ * A DrawingViewer can also be used to provide just a viewer for a Drawing
+ * without any interactive editing, just by not ever activating a tool on the
+ * viewer. That way, changes to the drawing may only be done programmatically.
  * 
  * @author Olaf Klischat
  */
