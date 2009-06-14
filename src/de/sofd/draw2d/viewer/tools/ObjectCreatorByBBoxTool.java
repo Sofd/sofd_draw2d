@@ -10,10 +10,10 @@ import de.sofd.draw2d.viewer.DrawingViewer;
  * Base class for DrawingViewer tools that allow the user to interactively
  * create new objects on the drawing by dragging their bounding box with the
  * mouse. Subclasses need to override only {@link #createNewObject()} and create
- * the desired object there to get a fully functional tool. This class will\ do
+ * the desired object there to get a fully functional tool. This class will do
  * everything else, for example, it will call
  * {@link DrawingObject#setLocation(de.sofd.draw2d.Location)} on the new object
- * whenever needed.
+ * continuously as the user drags the box.
  * 
  * @author olaf
  */
@@ -30,7 +30,7 @@ public abstract class ObjectCreatorByBBoxTool extends DrawingViewerTool {
      * mousePressed sets pt0 of the object's location, mouseDrag/-Release sets
      * pt2.
      */
-    private Point2D pt0;  // we create pt0 of the 
+    private Point2D pt0;  // we create pt0 of the object's location and drag pt2
     
     @Override
     public void associateWithViewer(DrawingViewer viewer) {

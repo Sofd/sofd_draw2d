@@ -58,6 +58,6 @@ public interface DrawingViewerBackend {
      * Called by the DrawingViewer as the last method immediately before this
      * backend will detached from it.
      */
-    void disconnected();
+    void disconnecting();
 
 }

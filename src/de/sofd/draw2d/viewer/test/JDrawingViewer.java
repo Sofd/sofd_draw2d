@@ -60,7 +60,7 @@ public class JDrawingViewer extends JPanel {
             JDrawingViewer.this.repaint((int) x, (int) y, (int) width, (int) height);
         }
         @Override
-        public void disconnected() {
+        public void disconnecting() {
         }
     };
     

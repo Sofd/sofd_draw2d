@@ -266,7 +266,7 @@ public class DrawingViewer {
 
     public void setBackend(DrawingViewerBackend be) {
         if (null != this.backend) {
-            this.backend.disconnected();
+            this.backend.disconnecting();
         }
         this.backend = be;
         if (null != this.backend) {
