@@ -19,7 +19,6 @@ import javax.swing.event.ChangeListener;
 
 import de.sofd.draw2d.Drawing;
 import de.sofd.draw2d.DrawingObject;
-import de.sofd.draw2d.viewer.DrawingViewer;
 import de.sofd.draw2d.viewer.EllipseTool;
 import de.sofd.draw2d.viewer.ObjectCreatorByBBoxTool;
 import de.sofd.draw2d.viewer.RectangleTool;
@@ -30,7 +29,7 @@ public class ViewerDisplayFrame extends JFrame {
     private static final long serialVersionUID = 1952563188075659723L;
 
     private Drawing drawing;
-    private DrawingViewer drawingViewer;
+    private JDrawingViewer drawingViewer;
     
     public ViewerDisplayFrame(String title, Drawing drawing) throws HeadlessException {
         super(title);
@@ -41,7 +40,7 @@ public class ViewerDisplayFrame extends JFrame {
     protected void frameInit() {
         super.frameInit();
 
-        drawingViewer = new DrawingViewer();
+        drawingViewer = new JDrawingViewer();
         
         JToolBar toolbar = new JToolBar("toolbar");
         toolbar.setFloatable(false);
@@ -90,7 +89,7 @@ public class ViewerDisplayFrame extends JFrame {
         this.drawing = d;
     }
 
-    public DrawingViewer getDrawingViewer() {
+    public JDrawingViewer getDrawingViewer() {
         return drawingViewer;
     }
 

@@ -1,19 +1,14 @@
 package de.sofd.draw2d.viewer;
 
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,8 +17,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
-import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
 import de.sofd.draw2d.Drawing;
@@ -34,6 +27,7 @@ import de.sofd.draw2d.event.DrawingListener;
 import de.sofd.draw2d.event.DrawingObjectAddOrMoveEvent;
 import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.event.DrawingObjectRemoveEvent;
+import de.sofd.draw2d.viewer.backend.DrawingViewerBackend;
 import de.sofd.draw2d.viewer.event.DrawingViewerEvent;
 import de.sofd.draw2d.viewer.event.DrawingViewerListener;
 import de.sofd.draw2d.viewer.event.DrawingViewerSelectionChangeEvent;
@@ -95,7 +89,7 @@ import de.sofd.util.IdentityHashSet;
  * 
  * @author Olaf Klischat
  */
-public class DrawingViewer extends JPanel {
+public class DrawingViewer {
 
     private static final long serialVersionUID = -5162812267404406219L;
 
@@ -107,6 +101,8 @@ public class DrawingViewer extends JPanel {
 
     private AffineTransform objectToDisplayTransform;
     private AffineTransform displayToObjectTransform;
+    
+    private DrawingViewerBackend backend;
 
     private final List<DrawingViewerListener> drawingViewerListeners =
         new ArrayList<DrawingViewerListener>();
@@ -127,9 +123,6 @@ public class DrawingViewer extends JPanel {
     
     public DrawingViewer() {
         setObjectToDisplayTransform(new AffineTransform());
-        this.addMouseListener(toolMouseForwarder);
-        this.addMouseMotionListener(toolMouseForwarder);
-        this.addMouseWheelListener(toolMouseForwarder);
     }
     
     public DrawingViewer(Drawing drawing) {
@@ -187,6 +180,20 @@ public class DrawingViewer extends JPanel {
         if (null == drawing) {
             throw new IllegalStateException("no Drawing associated with this DrawingVieweriewer");
         }
+    }
+    
+    public void setBackend(DrawingViewerBackend be) {
+        if (null != this.backend) {
+            this.backend.disconnected();
+        }
+        this.backend = be;
+        if (null != this.backend) {
+            this.backend.connected(this);
+        }
+    }
+    
+    public DrawingViewerBackend getBackend() {
+        return backend;
     }
     
     public List<DrawingObject> getDrawingObjectsAtObjCoord(Point2D pt) {
@@ -351,7 +358,47 @@ public class DrawingViewer extends JPanel {
         }
         currentTool = null;
     }
-    
+
+    public void processInputEvent(InputEvent e) {
+        int id = e.getID();
+        if (e instanceof MouseEvent) {
+            MouseEvent me = (MouseEvent) e;
+            switch(id) {
+            case MouseEvent.MOUSE_PRESSED:
+                toolMouseForwarder.mousePressed(me);
+                break;
+                
+            case MouseEvent.MOUSE_RELEASED:
+                toolMouseForwarder.mouseReleased(me);
+                break;
+
+            case MouseEvent.MOUSE_CLICKED:
+                toolMouseForwarder.mouseClicked(me);
+                break;
+            
+            case MouseEvent.MOUSE_EXITED:
+                toolMouseForwarder.mouseExited(me);
+                break;
+            
+            case MouseEvent.MOUSE_ENTERED:
+                toolMouseForwarder.mouseEntered(me);
+                break;
+            
+            case MouseEvent.MOUSE_MOVED:
+                toolMouseForwarder.mouseMoved(me);
+                break;
+            
+            case MouseEvent.MOUSE_DRAGGED:
+                toolMouseForwarder.mouseDragged(me);
+                break;
+
+            case MouseEvent.MOUSE_WHEEL:
+                toolMouseForwarder.mouseWheelMoved((MouseWheelEvent)me);
+                break;
+            }
+        }
+    }
+
     private ToolMouseForwarder toolMouseForwarder = new ToolMouseForwarder();
     
     private class ToolMouseForwarder implements MouseInputListener, MouseWheelListener {
@@ -430,25 +477,19 @@ public class DrawingViewer extends JPanel {
         }
     }
     
-    @Override
-    protected void paintComponent(Graphics g) {
-        Graphics2D g2d = (Graphics2D)g;
-        super.paintComponent(g2d);
-
-        if (null != drawing) {
-            //give the render* methods a Graphics2D whose coordinate system
-            //(and eventually, clipping) is already relative to the area in
-            //which the image can be drawn (i.e. excluding the space taken
-            //up by our border)
-            Graphics2D userGraphics = (Graphics2D)g2d.create();
-            Insets borderInsets = getInsets();
-            userGraphics.transform(AffineTransform.getTranslateInstance(borderInsets.left, borderInsets.top));
-            renderImage(userGraphics);
-            renderDrawing(userGraphics);
+    protected void repaint() {
+        if (backend != null) {
+            backend.repaint();
         }
     }
-
-    protected void renderDrawing(Graphics2D g2d) {
+    
+    protected void repaint(double x, double y, double width, double height) {
+        if (backend != null) {
+            backend.repaint();
+        }
+    }
+    
+    public void paint(Graphics2D g2d) {
         if (drawing == null) { return; }
         for (DrawingObject drobj : drawing.getObjects()) {
             DrawingObjectDrawingAdapter drawingAdapter = objectDrawingAdapters.get(drobj);
@@ -467,25 +508,4 @@ public class DrawingViewer extends JPanel {
         }
     }
 
-
-    // rendering of test image for performance analysis
-    
-    private BufferedImage backgroundImage;
-    private boolean backgroundImageFailedToLoad = false;
-    
-    protected void renderImage(Graphics2D g2d) {
-        if (backgroundImageFailedToLoad) { return; }
-        if (null == backgroundImage) {
-            try {
-                backgroundImage = ImageIO.read(this.getClass().getResourceAsStream("test/mri_brain.jpg"));
-            } catch (Exception e) {
-                System.err.println("failed to load DrawingViewer test background image");
-                e.printStackTrace();
-                backgroundImageFailedToLoad = true;
-            }
-        }
-        BufferedImageOp scaleImageOp = new AffineTransformOp(getObjectToDisplayTransform(), AffineTransformOp.TYPE_BILINEAR);
-        g2d.drawImage(backgroundImage, scaleImageOp, 0, 0);
-    }
-    
 }
