@@ -6,9 +6,9 @@ import java.awt.Graphics2D;
 
 import de.sofd.draw2d.RectangleObject;
 
-public class RectangleObjectDrawingAdapter extends DrawingObjectDrawingAdapter {
+public class RectangleObjectViewerAdapter extends DrawingObjectViewerAdapter {
 
-    public RectangleObjectDrawingAdapter(DrawingViewer viewer, RectangleObject drawingObject) {
+    public RectangleObjectViewerAdapter(DrawingViewer viewer, RectangleObject drawingObject) {
         super(viewer, drawingObject);
     }
 

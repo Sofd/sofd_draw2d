@@ -14,10 +14,10 @@ import de.sofd.draw2d.viewer.tools.SelectorTool;
  * object in some way, e.g. drag a corner to change the size, or drag a single
  * vertex of a polygon object.
  * <p>
- * The {@link DrawingObjectDrawingAdapter} of a DrawingObject in a DrawingViewer
+ * The {@link DrawingObjectViewerAdapter} of a DrawingObject in a DrawingViewer
  * defines which handles the object has using its
- * {@link DrawingObjectDrawingAdapter#getHandleCount()} /
- * {@link DrawingObjectDrawingAdapter#getHandle(int)} etc. methods.
+ * {@link DrawingObjectViewerAdapter#getHandleCount()} /
+ * {@link DrawingObjectViewerAdapter#getHandle(int)} etc. methods.
  * <p>
  * This is an abstract base class. Subclasses must as least implement either the
  * get/setPosition() methods or the get/setX/Y() methods methods with code that

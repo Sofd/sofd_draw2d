@@ -51,8 +51,12 @@ import de.sofd.util.IdentityHashSet;
  * {@link #getDisplayToObjectTransform()}. Initially this is set to the identity
  * transformation, but it may be changed at any time and the viewer will update
  * its display accordingly.
+ * <p>
+ * Some methods that take coordinate values or points as parameters (mostly
+ * methods of viewer adapters -- see below) have the name suffix "Disp" if the
+ * coordinates are interpreted in the display system, and "Obj" otherwise.
  * 
- * <h1>Display update</h1>
+ * <h1>Display Update</h1>
  * 
  * The DrawingViewer listens to change events of its Drawing, changes to the
  * transformation etc., and redraws its display accordingly. See the section
@@ -68,17 +72,17 @@ import de.sofd.util.IdentityHashSet;
  * or similar). See the section on drawing adapters to learn who will actually
  * end up drawing these things.
  * 
- * <h1>Drawing adapters</h1>
+ * <h1>Per-Object Viewer Adapters</h1>
  * 
- * A DrawingViewer does not itself know how to draw any of the DrawingObjects,
- * nor does it know about things like the objects' bounding boxes (which
- * determine when an object actually need to be redrawn), where the "interior"
- * of an objects is (relevant for mouse hit testing) or what "mouse dragging
- * handles" (see {@link MouseHandle} class) an object provides. Instead, the
- * viewer delegates drawing of the DrawingObjects (including visual feedback of
- * "selected" state etc.) and all the other tasks to special per-object
- * "drawing adapters", which are instances of subclasses of
- * {@link DrawingObjectDrawingAdapter}: There is one such adapter per
+ * A DrawingViewer does not itself know how to draw any of the DrawingObjects in
+ * its Drawing, nor does it know about things like the objects' bounding boxes
+ * (which determine when an object actually needs to be redrawn), where the
+ * "interior" of an object is (relevant for mouse hit testing) or what "mouse
+ * dragging handles" (see {@link MouseHandle} class) an object provides.
+ * Instead, the viewer delegates drawing of the DrawingObjects (including visual
+ * feedback of "selected" state etc.) and all the other tasks to special
+ * per-object "drawing adapters", which are instances of subclasses of
+ * {@link DrawingObjectViewerAdapter}: There is one such adapter per
  * DrawingObject in the Drawing; the adapter knows its DrawingObject. N.B.: The
  * DrawingViewer does not itself perform things like mouse hit testing and
  * dragging of mouse handles. Instead, it delegates these things to its
@@ -172,7 +176,7 @@ public class DrawingViewer {
     private static final long serialVersionUID = -5162812267404406219L;
 
     private Drawing drawing;
-    private Map<DrawingObject, DrawingObjectDrawingAdapter> objectDrawingAdapters = new IdentityHashMap<DrawingObject, DrawingObjectDrawingAdapter>();
+    private Map<DrawingObject, DrawingObjectViewerAdapter> objectDrawingAdapters = new IdentityHashMap<DrawingObject, DrawingObjectViewerAdapter>();
     // invariant: selectedObjects is a subset of drawing.getObjects()
     private Collection<DrawingObject> selectedObjects = new IdentityHashSet<DrawingObject>();
 
@@ -295,23 +299,23 @@ public class DrawingViewer {
         return drawing.getTopmostDrawingObjectAt(displayToObj(pt));
     }
 
-    protected DrawingObjectDrawingAdapter createDrawingAdapterFor(
+    protected DrawingObjectViewerAdapter createDrawingAdapterFor(
             DrawingObject drobj) {
         /*
          * TODO: use externally configurable DrawingObject class => adapter
          * class mapping instead of hard-coding the factory method like this
          */
         if (drobj instanceof EllipseObject) {
-            return new EllipseObjectDrawingAdapter(this, (EllipseObject) drobj);
+            return new EllipseObjectViewerAdapter(this, (EllipseObject) drobj);
         } else if (drobj instanceof RectangleObject) {
-            return new RectangleObjectDrawingAdapter(this,
+            return new RectangleObjectViewerAdapter(this,
                     (RectangleObject) drobj);
         } else {
-            return new DrawingObjectDrawingAdapter(this, drobj);
+            return new DrawingObjectViewerAdapter(this, drobj);
         }
     }
 
-    public DrawingObjectDrawingAdapter getDrawingAdapterFor(DrawingObject drobj) {
+    public DrawingObjectViewerAdapter getDrawingAdapterFor(DrawingObject drobj) {
         return objectDrawingAdapters.get(drobj);
     }
 
@@ -459,12 +463,13 @@ public class DrawingViewer {
      * Feed an input event (mouse or keyboard event) into this viewer for
      * processing. Normally done by the viewer's current
      * {@link DrawingViewerBackend}, but may also be done by anyone else, even
-     * if no backend is currently attached to the viewer. The viewer will
-     * process the input event (forward it on to the currently activated tool
-     * (cf. {@link #activateTool(DrawingViewerTool)}), if any), which may result
-     * in changes to the drawing objects and the viewer's graphical
-     * representation, in which case the viewer will request a repaint of itself
-     * by calling one of the repaint() methods on its backend.
+     * if no backend is currently attached to the viewer. The x/y coordinates of
+     * the mouse events must be in display coordinates. The viewer will process
+     * the event (forward it on to the currently activated tool (cf.
+     * {@link #activateTool(DrawingViewerTool)}), if any), which may result in
+     * changes to the drawing objects and the viewer's graphical representation,
+     * in which case the viewer will request a repaint of itself by calling one
+     * of the repaint() methods on its backend.
      * 
      * @param e
      *            the event
@@ -629,7 +634,7 @@ public class DrawingViewer {
             return;
         }
         for (DrawingObject drobj : drawing.getObjects()) {
-            DrawingObjectDrawingAdapter drawingAdapter = objectDrawingAdapters
+            DrawingObjectViewerAdapter drawingAdapter = objectDrawingAdapters
                     .get(drobj);
             assert drawingAdapter != null;
             Rectangle clip = g2d.getClipBounds();
@@ -641,7 +646,7 @@ public class DrawingViewer {
         // paint the selection visualizations on top of all the objects'
         // outlines themselves
         for (DrawingObject drobj : drawing.getObjects()) {
-            DrawingObjectDrawingAdapter drawingAdapter = objectDrawingAdapters
+            DrawingObjectViewerAdapter drawingAdapter = objectDrawingAdapters
                     .get(drobj);
             assert drawingAdapter != null;
             Rectangle clip = g2d.getClipBounds();

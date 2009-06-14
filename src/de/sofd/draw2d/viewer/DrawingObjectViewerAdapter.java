@@ -15,14 +15,14 @@ import de.sofd.draw2d.Location;
 import de.sofd.draw2d.event.DrawingObjectEvent;
 
 
-public class DrawingObjectDrawingAdapter {
+public class DrawingObjectViewerAdapter {
 
     private final DrawingViewer viewer;
     private final DrawingObject drawingObject;
 
     public static final int HANDLE_BOX_WIDTH = 6;
     
-    public DrawingObjectDrawingAdapter(DrawingViewer viewer, DrawingObject drawingObject) {
+    public DrawingObjectViewerAdapter(DrawingViewer viewer, DrawingObject drawingObject) {
         this.viewer = viewer;
         this.drawingObject = drawingObject;
     }
@@ -141,8 +141,8 @@ public class DrawingObjectDrawingAdapter {
          *            defined as in {@link Location#getPt(int)}.
          */
         public BoundsHandle(int nr) {
-            super(DrawingObjectDrawingAdapter.this.getDrawingObject(),  // TODO: this would always be the same; let the viewer set it using a setter in the base class
-                  DrawingObjectDrawingAdapter.class.getName() + ".boundsHandle" + nr);
+            super(DrawingObjectViewerAdapter.this.getDrawingObject(),  // TODO: this would always be the same; let the viewer set it using a setter in the base class
+                  DrawingObjectViewerAdapter.class.getName() + ".boundsHandle" + nr);
             this.nr = nr;
         }
         public int getNr() {

@@ -6,9 +6,9 @@ import java.awt.Graphics2D;
 
 import de.sofd.draw2d.EllipseObject;
 
-public class EllipseObjectDrawingAdapter extends DrawingObjectDrawingAdapter {
+public class EllipseObjectViewerAdapter extends DrawingObjectViewerAdapter {
 
-    public EllipseObjectDrawingAdapter(DrawingViewer viewer, EllipseObject drawingObject) {
+    public EllipseObjectViewerAdapter(DrawingViewer viewer, EllipseObject drawingObject) {
         super(viewer, drawingObject);
     }
 
