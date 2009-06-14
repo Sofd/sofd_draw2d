@@ -1,10 +1,12 @@
-package de.sofd.draw2d.viewer;
+package de.sofd.draw2d.viewer.tools;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
 import javax.swing.event.MouseInputListener;
+
+import de.sofd.draw2d.viewer.DrawingViewer;
 
 /**
  * Base class for drawing manipulation tools, like vector drawing programs have
@@ -28,9 +30,6 @@ import javax.swing.event.MouseInputListener;
  * <p>
  * Some keyboard event listener methods will also be declared here eventually.
  * <p>
- * You'll probably want to derive your own tools from {@link DrawingViewerTool}
- * rather than completely implementing this interface yourself.
- * <p>
  * DrawingViewerTool itself provides implementations for
  * {@link #associateWithViewer(DrawingViewer)} /
  * {@link #disassociateFromViewer()} / {@link #getAssociatedViewer()} as well as
@@ -46,7 +45,7 @@ public abstract class DrawingViewerTool implements MouseInputListener, MouseWhee
      * Called by {@link DrawingViewer} when this DrawingViewerTool is newly
      * associated with the viewer. May be called multiple times (the same tool
      * may be associated/disassociated with the same or different viewers at any
-     * time).
+     * time). <strong>Should never called by outside code.</strong>
      * <p>
      * Implementation must make sure the viewer supplied here is returned by
      * {@link #getAssociatedViewer()} afterwards (derive from
@@ -66,7 +65,7 @@ public abstract class DrawingViewerTool implements MouseInputListener, MouseWhee
      *            the {@link DrawingViewer} that this tool is being associated
      *            with.
      */
-    protected void associateWithViewer(DrawingViewer viewer) {
+    public void associateWithViewer(DrawingViewer viewer) {
         this.associatedViewer = viewer;
     }
 
@@ -74,7 +73,8 @@ public abstract class DrawingViewerTool implements MouseInputListener, MouseWhee
      * Called by the {@link #getAssociatedViewer()} when this DrawingViewerTool
      * is being disassociated from the {@link #getAssociatedViewer()}. May be
      * called multiple times (the same tool may be associated/disassociated with
-     * the same or different viewers at any time).
+     * the same or different viewers at any time). <strong>Should never called
+     * by outside code.</strong>
      * <p>
      * Implementation must make sure that {@link #getAssociatedViewer()} returns
      * null immediately after this method was called (derive from
@@ -103,7 +103,7 @@ public abstract class DrawingViewerTool implements MouseInputListener, MouseWhee
      * {@link #associateWithViewer(DrawingViewer)} (on the new tool) correctly
      * being called successively.
      */
-    protected void disassociateFromViewer() {
+    public void disassociateFromViewer() {
         this.associatedViewer = null;
     }
 

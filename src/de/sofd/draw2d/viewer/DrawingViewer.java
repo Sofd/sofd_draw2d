@@ -31,6 +31,7 @@ import de.sofd.draw2d.viewer.backend.DrawingViewerBackend;
 import de.sofd.draw2d.viewer.event.DrawingViewerEvent;
 import de.sofd.draw2d.viewer.event.DrawingViewerListener;
 import de.sofd.draw2d.viewer.event.DrawingViewerSelectionChangeEvent;
+import de.sofd.draw2d.viewer.tools.DrawingViewerTool;
 import de.sofd.util.IdentityHashSet;
 
 /**

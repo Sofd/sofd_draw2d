@@ -19,10 +19,10 @@ import javax.swing.event.ChangeListener;
 
 import de.sofd.draw2d.Drawing;
 import de.sofd.draw2d.DrawingObject;
-import de.sofd.draw2d.viewer.EllipseTool;
-import de.sofd.draw2d.viewer.ObjectCreatorByBBoxTool;
-import de.sofd.draw2d.viewer.RectangleTool;
-import de.sofd.draw2d.viewer.SelectorTool;
+import de.sofd.draw2d.viewer.tools.EllipseTool;
+import de.sofd.draw2d.viewer.tools.ObjectCreatorByBBoxTool;
+import de.sofd.draw2d.viewer.tools.RectangleTool;
+import de.sofd.draw2d.viewer.tools.SelectorTool;
 
 public class ViewerDisplayFrame extends JFrame {
 

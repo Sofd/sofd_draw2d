@@ -17,8 +17,8 @@ import javax.swing.JPanel;
 import de.sofd.draw2d.Drawing;
 import de.sofd.draw2d.DrawingObject;
 import de.sofd.draw2d.viewer.DrawingViewer;
-import de.sofd.draw2d.viewer.DrawingViewerTool;
 import de.sofd.draw2d.viewer.backend.DrawingViewerBackend;
+import de.sofd.draw2d.viewer.tools.DrawingViewerTool;
 
 
 /**

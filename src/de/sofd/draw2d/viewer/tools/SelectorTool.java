@@ -1,4 +1,4 @@
-package de.sofd.draw2d.viewer;
+package de.sofd.draw2d.viewer.tools;
 
 import java.awt.Point;
 import java.awt.event.InputEvent;
@@ -6,6 +6,9 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 
 import de.sofd.draw2d.DrawingObject;
+import de.sofd.draw2d.viewer.DrawingViewer;
+import de.sofd.draw2d.viewer.MouseHandle;
+import de.sofd.draw2d.viewer.NoSuchMouseHandleException;
 
 public class SelectorTool extends DrawingViewerTool {
 
@@ -16,13 +19,13 @@ public class SelectorTool extends DrawingViewerTool {
     private Point2D latestSelectionDragPt;
 
     @Override
-    protected void associateWithViewer(DrawingViewer viewer) {
+    public void associateWithViewer(DrawingViewer viewer) {
         super.associateWithViewer(viewer);
         state = State.IDLE;
     }
     
     @Override
-    protected void disassociateFromViewer() {
+    public void disassociateFromViewer() {
         super.disassociateFromViewer();
         state = State.UNASSOCIATED;
     }

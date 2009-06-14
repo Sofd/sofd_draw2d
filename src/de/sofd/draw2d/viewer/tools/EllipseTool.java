@@ -1,4 +1,4 @@
-package de.sofd.draw2d.viewer;
+package de.sofd.draw2d.viewer.tools;
 
 import de.sofd.draw2d.DrawingObject;
 import de.sofd.draw2d.EllipseObject;

@@ -1,9 +1,10 @@
-package de.sofd.draw2d.viewer;
+package de.sofd.draw2d.viewer.tools;
 
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 
 import de.sofd.draw2d.DrawingObject;
+import de.sofd.draw2d.viewer.DrawingViewer;
 
 /**
  * Base class for DrawingViewer tools that allow the user to interactively
@@ -32,12 +33,12 @@ public abstract class ObjectCreatorByBBoxTool extends DrawingViewerTool {
     private Point2D pt0;  // we create pt0 of the 
     
     @Override
-    protected void associateWithViewer(DrawingViewer viewer) {
+    public void associateWithViewer(DrawingViewer viewer) {
         super.associateWithViewer(viewer);
     }
     
     @Override
-    protected void disassociateFromViewer() {
+    public void disassociateFromViewer() {
         super.disassociateFromViewer();
         currentObject = null;
     }
