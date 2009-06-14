@@ -24,14 +24,14 @@ import de.sofd.draw2d.viewer.tools.ObjectCreatorByBBoxTool;
 import de.sofd.draw2d.viewer.tools.RectangleTool;
 import de.sofd.draw2d.viewer.tools.SelectorTool;
 
-public class ViewerDisplayFrame extends JFrame {
+public class DrawingViewerFrame extends JFrame {
 
     private static final long serialVersionUID = 1952563188075659723L;
 
     private Drawing drawing;
-    private JDrawingViewer drawingViewer;
+    private JDrawingViewer viewer;
     
-    public ViewerDisplayFrame(String title, Drawing drawing) throws HeadlessException {
+    public DrawingViewerFrame(String title, Drawing drawing) throws HeadlessException {
         super(title);
         setDrawing(drawing);
     }
@@ -40,7 +40,7 @@ public class ViewerDisplayFrame extends JFrame {
     protected void frameInit() {
         super.frameInit();
 
-        drawingViewer = new JDrawingViewer();
+        viewer = new JDrawingViewer();
         
         JToolBar toolbar = new JToolBar("toolbar");
         toolbar.setFloatable(false);
@@ -55,7 +55,7 @@ public class ViewerDisplayFrame extends JFrame {
             public void stateChanged(ChangeEvent e) {
                 zoomValueLabel.setText(""+zoomSlider.getValue()+"%");
                 double scale = (double)zoomSlider.getValue()/100;
-                drawingViewer.setObjectToDisplayTransform(AffineTransform.getScaleInstance(scale, scale));
+                viewer.setObjectToDisplayTransform(AffineTransform.getScaleInstance(scale, scale));
             }
         });
         toolbar.add(new JLabel("ObjNr:"));
@@ -72,25 +72,25 @@ public class ViewerDisplayFrame extends JFrame {
                 int nr = (Integer)objNrChooser.getValue();
                 if (nr >= 0 && nr < drawing.getObjectCount()) {
                     DrawingObject drobj = drawing.get(nr);
-                    drawingViewer.toggleSelected(drobj);
+                    viewer.toggleSelected(drobj);
                 }
             }
         });
 
         getContentPane().add(toolbar, BorderLayout.PAGE_START);
-        getContentPane().add(drawingViewer, BorderLayout.CENTER);
+        getContentPane().add(viewer, BorderLayout.CENTER);
     }
     
     public void setDrawing(Drawing d) {
-        drawingViewer.setDrawing(d);
-        drawingViewer.activateTool(new SelectorTool());
+        viewer.setDrawing(d);
+        viewer.activateTool(new SelectorTool());
         //drawingViewer.activateTool(new EllipseTool());
         //drawingViewer.activateTool(new RectangleTool());
         this.drawing = d;
     }
 
-    public JDrawingViewer getDrawingViewer() {
-        return drawingViewer;
+    public JDrawingViewer getDrawingViewerComponent() {
+        return viewer;
     }
 
 }

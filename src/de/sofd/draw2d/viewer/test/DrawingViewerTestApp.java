@@ -23,12 +23,12 @@ public class DrawingViewerTestApp {
         dr.addDrawingObject(ellipse);
         dr.addDrawingObject(ell2);
         
-        ViewerDisplayFrame frame1 = new ViewerDisplayFrame("Viewer 1", dr);
+        DrawingViewerFrame frame1 = new DrawingViewerFrame("Viewer 1", dr);
         frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame1.setSize(500, 500);
         frame1.setVisible(true);
 
-        ViewerDisplayFrame frame2 = new ViewerDisplayFrame("Viewer 2", dr);
+        DrawingViewerFrame frame2 = new DrawingViewerFrame("Viewer 2", dr);
         frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame2.setSize(500, 500);
         frame2.setLocation(400, 200);

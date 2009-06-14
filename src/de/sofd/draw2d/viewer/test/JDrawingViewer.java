@@ -68,7 +68,7 @@ public class JDrawingViewer extends JPanel {
         wrappedViewer = new DrawingViewer();
         wrappedViewer.setBackend(wrappedViewerBackend);
         // enable mouse events (normally done automatically upon calling any of the addMouse...Listener methods,
-        // by we override processMouse...Event directly instead)
+        // but we'll override processMouse...Event directly instead)
         enableEvents(AWTEvent.MOUSE_EVENT_MASK|AWTEvent.MOUSE_MOTION_EVENT_MASK|AWTEvent.MOUSE_WHEEL_EVENT_MASK);
     }
 
@@ -99,6 +99,8 @@ public class JDrawingViewer extends JPanel {
         }
     }
     
+    // forward mouse events that occur on this component to the viewer
+    
     @Override
     protected void processMouseMotionEvent(MouseEvent e) {
         super.processMouseMotionEvent(e);
@@ -114,6 +116,8 @@ public class JDrawingViewer extends JPanel {
             wrappedViewer.processInputEvent(e);
         }
     }
+
+    // paint method
     
     @Override
     protected void paintComponent(Graphics g) {
