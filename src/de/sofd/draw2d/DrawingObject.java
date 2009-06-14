@@ -14,6 +14,9 @@ import de.sofd.draw2d.viewer.DrawingViewer;
  * Base class for vector drawing objects that live in an infinite, continuous,
  * 2-dimensional cartesian coordinate system with double-valued x- and y-axes.
  * <p>
+ * Fires pre- and post-change events if any aspect of itself changes (see
+ * {@link #addDrawingObjectListener(DrawingObjectListener)} and friends).
+ * <p>
  * No drawing code in here or in any subclasses, no dependency on any GUI or
  * drawing toolkits. For displaying DrawingObjects, add them to a
  * {@link Drawing} and display that using a {@link DrawingViewer}.

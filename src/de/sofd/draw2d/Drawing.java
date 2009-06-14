@@ -10,11 +10,22 @@ import de.sofd.draw2d.event.DrawingObjectAddOrMoveEvent;
 import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.event.DrawingObjectListener;
 import de.sofd.draw2d.event.DrawingObjectRemoveEvent;
+import de.sofd.draw2d.viewer.DrawingViewer;
 
 /**
  * A Drawing made up of {@link DrawingObject}s. The objects are contained in a
  * defined order (z-order) which determines which objects are drawn above/below
  * which other ones.
+ * <p>
+ * Fires pre- and post-change events if objects are added or removed, and also
+ * forwards all the change events of the constituent objects, all to the same
+ * set of event listeners (see {@link #addDrawingListener(DrawingListener)} and
+ * friends). (so users will only have to add one listener to the drawing instead
+ * of also adding/removing listener to/from all the drawing's objects as they're
+ * added/removed).
+ * <p>
+ * For painting or displaying a drawing and for providing a means for the end
+ * user to interactively modify the drawing, use a {@link DrawingViewer}.
  * 
  * @author olaf
  */
