@@ -485,7 +485,7 @@ public class DrawingViewer {
     
     protected void repaint(double x, double y, double width, double height) {
         if (backend != null) {
-            backend.repaint();
+            backend.repaint(x, y, width, height);
         }
     }
     
