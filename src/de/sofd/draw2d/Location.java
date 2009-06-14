@@ -4,15 +4,19 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**
- * Rectangular 2D area. Like a {@link Rectangle2D.Double}, but works correctly
- * with negative widths and/or heights. It does this by representing the
- * rectangle by its 4 corner points, named pt0, pt1, pt2, pt3 here, where pt0
- * and pt2 as well as pt1 and pt3 are diagonally arranged. So, pt0 and pt1 share
- * their y coordinates, as do pt2 and pt3, and pt1 and pt2 share their x
- * coordinates, as do pt0 and pt3. Setting one of the points using the
+ * Rectangular 2D area. Like a {@link Rectangle2D}, but works correctly with
+ * negative widths and/or heights. It does this by representing the rectangle by
+ * its 4 corner points, named pt0, pt1, pt2, pt3 here, where pt0 and pt2 as well
+ * as pt1 and pt3 are diagonally arranged. So, pt0 and pt1 share their y
+ * coordinates, as do pt2 and pt3, and pt1 and pt2 share their x coordinates, as
+ * do pt0 and pt3. Setting one of the points using the
  * {@link #setPt0(double, double)} .. {@link #setPt3(double, double)} methods
- * thus automatically modifies the connected other points as well to keep
- * everything consistent.
+ * thus automatically modifies the adjacent other points as well to keep
+ * everything consistent. Diagonally arranged points are of course independent
+ * of each other in this respect; changing one of them won't change the other.
+ * There's also no requirement for any of the points to always be to the
+ * "lower right", "upper left" etc. of some other point for all the methods in
+ * this class to work correctly, as would be the case with Rectangle2D.
  * 
  * @author Olaf Klischat
  */
