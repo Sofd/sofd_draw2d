@@ -1,6 +1,7 @@
 package de.sofd.draw2d.viewer;
 
 import java.awt.Point;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 
@@ -46,7 +47,7 @@ public class SelectorTool extends DrawingViewerTool {
                 getAssociatedViewer().clearSelection();
                 return;
             }
-            if (false/*TODO: shift pressed*/) {
+            if ((e.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK) {
                 getAssociatedViewer().addToSelection(clickedObj);
             } else {
                 getAssociatedViewer().setSelection(clickedObj);
