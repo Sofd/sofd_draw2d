@@ -27,6 +27,9 @@ import de.sofd.draw2d.event.DrawingListener;
 import de.sofd.draw2d.event.DrawingObjectAddOrMoveEvent;
 import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.event.DrawingObjectRemoveEvent;
+import de.sofd.draw2d.viewer.adapters.DrawingObjectViewerAdapter;
+import de.sofd.draw2d.viewer.adapters.EllipseObjectViewerAdapter;
+import de.sofd.draw2d.viewer.adapters.RectangleObjectViewerAdapter;
 import de.sofd.draw2d.viewer.backend.DrawingViewerBackend;
 import de.sofd.draw2d.viewer.event.DrawingViewerEvent;
 import de.sofd.draw2d.viewer.event.DrawingViewerListener;
@@ -562,11 +565,13 @@ public class DrawingViewer {
     }
 
     /**
-     * schedule repainting of the drawing area covered by dobj
+     * schedule repainting of the drawing area covered by dobj. Not a public
+     * method (don't call from outside). Declared public only because the
+     * {@link DrawingObjectViewerAdapter} base class needs to call it.
      * 
      * @param dobj
      */
-    protected void repaintObjectArea(DrawingObject drobj) {
+    public void repaintObjectArea(DrawingObject drobj) {
         Rectangle bounds = getDrawingAdapterFor(drobj).getBounds2DDisp().getBounds();
         repaint(bounds.x, bounds.y, bounds.width, bounds.height);
     }

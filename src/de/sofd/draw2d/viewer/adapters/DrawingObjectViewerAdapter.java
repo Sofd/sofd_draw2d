@@ -1,4 +1,4 @@
-package de.sofd.draw2d.viewer;
+package de.sofd.draw2d.viewer.adapters;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -13,6 +13,8 @@ import java.util.List;
 import de.sofd.draw2d.DrawingObject;
 import de.sofd.draw2d.Location;
 import de.sofd.draw2d.event.DrawingObjectEvent;
+import de.sofd.draw2d.viewer.DrawingViewer;
+import de.sofd.draw2d.viewer.MouseHandle;
 
 
 public class DrawingObjectViewerAdapter {

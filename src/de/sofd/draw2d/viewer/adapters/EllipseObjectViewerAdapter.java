@@ -1,10 +1,11 @@
-package de.sofd.draw2d.viewer;
+package de.sofd.draw2d.viewer.adapters;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
 import de.sofd.draw2d.EllipseObject;
+import de.sofd.draw2d.viewer.DrawingViewer;
 
 public class EllipseObjectViewerAdapter extends DrawingObjectViewerAdapter {
 
