@@ -84,6 +84,14 @@ public class DrawingViewerFrame extends JFrame {
                 });
             }
         });
+        toolbar.add(new AbstractAction("del") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for (DrawingObject drobj : viewer.getSelection()) {
+                    drawing.removeDrawingObject(drobj);
+                }
+            }
+        });
         
         toolbar.add(new JLabel("Zoom:"));
         final JLabel zoomValueLabel = new JLabel("      ");
