@@ -37,12 +37,23 @@ public class DrawingViewerFrame extends JFrame {
     private JDrawingViewer viewer;
     
     private Color currColor = Color.RED;
+    private double currZoom = 1.0;
+    private double currRot = 0.0;
     
     public DrawingViewerFrame(String title, Drawing drawing) throws HeadlessException {
         super(title);
         setDrawing(drawing);
     }
 
+    private void updateViewerTransform() {
+        AffineTransform t = new AffineTransform();
+        t.scale(currZoom, currZoom);
+        t.translate(currZoom * 256, currZoom * 256);
+        t.rotate(currRot);
+        t.translate(- currZoom * 256, - currZoom * 256);
+        viewer.setObjectToDisplayTransform(t);
+    }
+    
     @Override
     protected void frameInit() {
         super.frameInit();
@@ -103,8 +114,21 @@ public class DrawingViewerFrame extends JFrame {
             @Override
             public void stateChanged(ChangeEvent e) {
                 zoomValueLabel.setText(""+zoomSlider.getValue()+"% ");
-                double scale = (double)zoomSlider.getValue()/100;
-                viewer.setObjectToDisplayTransform(AffineTransform.getScaleInstance(scale, scale));
+                currZoom = (double)zoomSlider.getValue()/100;
+                updateViewerTransform();
+            }
+        });
+        toolbar.add(new JLabel("Rot:"));
+        final JLabel rotValueLabel = new JLabel("      ");
+        final JSlider rotSlider = new JSlider(SwingConstants.HORIZONTAL, 0, 360, 0);
+        toolbar.add(rotSlider);
+        toolbar.add(rotValueLabel);
+        rotSlider.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                rotValueLabel.setText(""+rotSlider.getValue()+"° ");
+                currRot = (double)rotSlider.getValue() / 360.0 * 2 * Math.PI;
+                updateViewerTransform();
             }
         });
         

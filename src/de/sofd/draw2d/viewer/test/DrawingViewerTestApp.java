@@ -31,12 +31,12 @@ public class DrawingViewerTestApp {
         
         DrawingViewerFrame frame1 = new DrawingViewerFrame("Viewer 1", dr);
         frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame1.setSize(500, 500);
+        frame1.setSize(700, 700);
         frame1.setVisible(true);
 
         DrawingViewerFrame frame2 = new DrawingViewerFrame("Viewer 2", dr);
         frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame2.setSize(500, 500);
+        frame2.setSize(700, 700);
         frame2.setLocation(400, 200);
         frame2.setVisible(true);
         
