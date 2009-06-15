@@ -1,10 +1,12 @@
 package de.sofd.draw2d;
 
+import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.sofd.draw2d.event.DrawingObjectColorChangeEvent;
 import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.event.DrawingObjectListener;
 import de.sofd.draw2d.event.DrawingObjectLocationChangeEvent;
@@ -29,6 +31,8 @@ public abstract class DrawingObject {
         new ArrayList<DrawingObjectListener>();
     
     private final Location location = new Location(0,0,0,0);
+    
+    private Color color = Color.RED;
 
     /**
      * Gives the current 2D location of this object, as a rectangular bounding
@@ -109,6 +113,17 @@ public abstract class DrawingObject {
      */
     protected void onLocationChanged(Location oldLocation) {
         //
+    }
+    
+    public Color getColor() {
+        return color;
+    }
+    
+    public void setColor(Color newColor) {
+        Color oldColor = this.color;
+        fireDrawingObjectEvent(DrawingObjectColorChangeEvent.newBeforeChangeEvent(this, oldColor, newColor));
+        this.color = newColor;
+        fireDrawingObjectEvent(DrawingObjectColorChangeEvent.newAfterChangeEvent(this, oldColor, newColor));
     }
     
     public boolean contains(Point2D pt) {

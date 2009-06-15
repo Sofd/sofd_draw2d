@@ -1,7 +1,6 @@
 package de.sofd.draw2d.viewer.adapters;
 
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Graphics2D;
 
 import de.sofd.draw2d.RectangleObject;
@@ -20,7 +19,7 @@ public class RectangleObjectViewerAdapter extends DrawingObjectViewerAdapter {
     
     @Override
     public void paintObjectOn(Graphics2D g2d) {
-        g2d.setPaint(Color.RED);
+        g2d.setPaint(getDrawingObject().getColor());
         g2d.transform(getViewer().getObjectToDisplayTransform());
         g2d.setStroke(new BasicStroke(0));
         g2d.draw(getDrawingObject().getBounds2D());

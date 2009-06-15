@@ -1,5 +1,7 @@
 package de.sofd.draw2d.viewer.test;
 
+import java.awt.Color;
+
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
@@ -12,12 +14,15 @@ public class DrawingViewerTestApp {
     public DrawingViewerTestApp() {
         RectangleObject rect = new RectangleObject();
         rect.setLocation(100, 50, 400, 250);
+        rect.setColor(Color.RED);
         
         EllipseObject ellipse = new EllipseObject();
         ellipse.setLocation(180, 20, 270, 400);
+        ellipse.setColor(Color.CYAN);
         
         EllipseObject ell2 = new EllipseObject();
         ell2.setLocation(rect.getLocation());
+        ell2.setColor(Color.YELLOW);
 
         Drawing dr = new Drawing();
         dr.addDrawingObject(rect);
