@@ -10,6 +10,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
+import java.util.Collection;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
@@ -84,6 +85,10 @@ public class JDrawingViewer extends JPanel {
 
     public void activateTool(DrawingViewerTool t) {
         wrappedViewer.activateTool(t);
+    }
+
+    public Collection<DrawingObject> getSelection() {
+        return wrappedViewer.getSelection();
     }
 
     public void toggleSelected(DrawingObject drobj) {

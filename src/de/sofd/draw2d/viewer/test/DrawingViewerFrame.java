@@ -1,14 +1,20 @@
 package de.sofd.draw2d.viewer.test;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 
 import javax.swing.AbstractAction;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JToolBar;
@@ -30,6 +36,8 @@ public class DrawingViewerFrame extends JFrame {
     private Drawing drawing;
     private JDrawingViewer viewer;
     
+    private Color currColor = Color.RED;
+    
     public DrawingViewerFrame(String title, Drawing drawing) throws HeadlessException {
         super(title);
         setDrawing(drawing);
@@ -43,6 +51,40 @@ public class DrawingViewerFrame extends JFrame {
         
         JToolBar toolbar = new JToolBar("toolbar");
         toolbar.setFloatable(false);
+        
+        toolbar.add(new AbstractAction("Sel") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                viewer.activateTool(new SelectorTool());
+            }
+        });
+        toolbar.add(new AbstractAction("Rec") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                viewer.activateTool(new RectangleTool() {
+                    @Override
+                    protected DrawingObject createNewObject() {
+                        DrawingObject rect = super.createNewObject();
+                        rect.setColor(currColor);
+                        return rect;
+                    }
+                });
+            }
+        });
+        toolbar.add(new AbstractAction("Ell") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                viewer.activateTool(new EllipseTool() {
+                    @Override
+                    protected DrawingObject createNewObject() {
+                        DrawingObject ell = super.createNewObject();
+                        ell.setColor(currColor);
+                        return ell;
+                    }
+                });
+            }
+        });
+        
         toolbar.add(new JLabel("Zoom:"));
         final JLabel zoomValueLabel = new JLabel("      ");
         final JSlider zoomSlider = new JSlider(SwingConstants.HORIZONTAL, 20, 400, 100);
@@ -52,11 +94,55 @@ public class DrawingViewerFrame extends JFrame {
         zoomSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                zoomValueLabel.setText(""+zoomSlider.getValue()+"%");
+                zoomValueLabel.setText(""+zoomSlider.getValue()+"% ");
                 double scale = (double)zoomSlider.getValue()/100;
                 viewer.setObjectToDisplayTransform(AffineTransform.getScaleInstance(scale, scale));
             }
         });
+        
+        toolbar.add(new JLabel("Col:"));
+        final JComboBox colorCombo = new JComboBox(new Object[]{Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.CYAN});
+        toolbar.add(colorCombo);
+        colorCombo.setEditable(false);
+        colorCombo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                currColor = (Color) colorCombo.getModel().getSelectedItem();
+                for (DrawingObject drobj : viewer.getSelection()) {
+                    drobj.setColor(currColor);
+                }
+            }
+        });
+        colorCombo.setRenderer(new DefaultListCellRenderer() {
+            private static final long serialVersionUID = -2010584656340119829L;
+            @Override
+            public Component getListCellRendererComponent(JList list, Object value,
+                    int index, boolean isSelected, boolean cellHasFocus) {
+                Color col = (Color) value;
+                JLabel result = new JLabel();
+                if (null == col) {
+                    result.setText("null   ");
+                } else if (col.equals(Color.RED)) {
+                    result.setText("red");
+                } else if (col == Color.GREEN) {
+                    result.setText("green");
+                } else if (col == Color.BLUE) {
+                    result.setText("blue");
+                } else if (col == Color.YELLOW) {
+                    result.setText("yellow");
+                } else if (col == Color.CYAN) {
+                    result.setText("cyan");
+                } else {
+                    result.setText("xy   ");
+                }
+                result.setOpaque(true);
+                result.setBackground((Color)value);
+                // JComboBox will reset the background if this is the selected item :-(
+                return result;
+            }
+        });
+
+        
         toolbar.add(new JLabel("ObjNr:"));
         final JSpinner objNrChooser = new JSpinner(new SpinnerNumberModel(0,0,100,1)) {
             @Override
