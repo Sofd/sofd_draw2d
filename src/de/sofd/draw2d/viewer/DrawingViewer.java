@@ -21,19 +21,19 @@ import javax.swing.event.MouseInputListener;
 
 import de.sofd.draw2d.Drawing;
 import de.sofd.draw2d.DrawingObject;
-import de.sofd.draw2d.EllipseObject;
-import de.sofd.draw2d.RectangleObject;
 import de.sofd.draw2d.event.DrawingListener;
 import de.sofd.draw2d.event.DrawingObjectAddOrMoveEvent;
 import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.event.DrawingObjectRemoveEvent;
+import de.sofd.draw2d.viewer.adapters.DefaultObjectViewerAdapterFactory;
 import de.sofd.draw2d.viewer.adapters.DrawingObjectViewerAdapter;
-import de.sofd.draw2d.viewer.adapters.EllipseObjectViewerAdapter;
-import de.sofd.draw2d.viewer.adapters.RectangleObjectViewerAdapter;
+import de.sofd.draw2d.viewer.adapters.MouseHandle;
+import de.sofd.draw2d.viewer.adapters.ObjectViewerAdapterFactory;
 import de.sofd.draw2d.viewer.backend.DrawingViewerBackend;
 import de.sofd.draw2d.viewer.event.DrawingViewerEvent;
 import de.sofd.draw2d.viewer.event.DrawingViewerListener;
 import de.sofd.draw2d.viewer.event.DrawingViewerSelectionChangeEvent;
+import de.sofd.draw2d.viewer.test.JDrawingViewer;
 import de.sofd.draw2d.viewer.tools.DrawingViewerTool;
 import de.sofd.util.IdentityHashSet;
 
@@ -91,9 +91,17 @@ import de.sofd.util.IdentityHashSet;
  * dragging of mouse handles. Instead, it delegates these things to its
  * currently activated "drawing viewer tool". See below for tools.
  * <p>
- * It will be possible for users to write their own drawing adapters and
- * register them with the viewer in order to support new DrawingObject types
- * without changing or subclassing the DrawingViewer class.
+ * When the viewer needs to create the adapter for a DrawingObject in its
+ * drawing (this happens when a new object is added to the drawing, and when the
+ * drawing itself is set for the viewer), it delegates this task to an
+ * {@link ObjectViewerAdapterFactory}. The ObjectViewerAdapterFactory to use by
+ * the viewer can be supplied to some of DrawingViewer's constructors. If you
+ * create the DrawingViewer without supplying an adapter factory, a
+ * {@link DefaultObjectViewerAdapterFactory} is used. If you've written
+ * additional DrawingObject subclasses and want to display them in a
+ * DrawingViewer, write your own {@link DrawingObjectViewerAdapter} subclass for
+ * each of your DrawingObject subclasses, write a new ObjectViewerAdapterFactory
+ * that can create your new adapters, and use that for the DrawingViewer.
  * 
  * <h1>Drawing Viewer Events</h1>
  * 
@@ -181,6 +189,7 @@ public class DrawingViewer {
     private Drawing drawing;
     private Map<DrawingObject, DrawingObjectViewerAdapter> objectDrawingAdapters
         = new IdentityHashMap<DrawingObject, DrawingObjectViewerAdapter>();
+    private final ObjectViewerAdapterFactory viewerAdapterFactory;
     // invariant: selectedObjects is a subset of drawing.getObjects()
     private Collection<DrawingObject> selectedObjects = new IdentityHashSet<DrawingObject>();
 
@@ -205,15 +214,36 @@ public class DrawingViewer {
         }
     }
 
-    public DrawingViewer() {
+    /**
+     * 
+     * @param viewerAdapterFactory
+     *            the {@link ObjectViewerAdapterFactory} that should be used by
+     *            this viewer when it needs to create the
+     *            {@link DrawingObjectViewerAdapter} for a DrawingObject in the
+     *            viewer's drawing (this happens when a new object is added to
+     *            the drawing, and when the drawing itself is set for the
+     *            viewer). By default, DrawingViewer uses a
+     *            {@link DefaultObjectViewerAdapterFactory}.
+     */
+    public DrawingViewer(ObjectViewerAdapterFactory viewerAdapterFactory) {
+        this.viewerAdapterFactory = viewerAdapterFactory;
         setObjectToDisplayTransform(new AffineTransform());
     }
 
+    public DrawingViewer() {
+        this(new DefaultObjectViewerAdapterFactory());
+    }
+    
     public DrawingViewer(Drawing drawing) {
-        this();
+        this(new DefaultObjectViewerAdapterFactory());
         setDrawing(drawing);
     }
 
+    public DrawingViewer(Drawing drawing, ObjectViewerAdapterFactory viewerAdapterFactory) {
+        this(viewerAdapterFactory);
+        setDrawing(drawing);
+    }
+    
     public void setObjectToDisplayTransform(AffineTransform t) {
         try {
             displayToObjectTransform = t.createInverse();
@@ -250,7 +280,7 @@ public class DrawingViewer {
         if (null != this.drawing) {
             this.drawing.addDrawingListener(drawingEventHandler);
             for (DrawingObject drobj : this.drawing.getObjects()) {
-                this.objectDrawingAdapters.put(drobj, createDrawingAdapterFor(drobj));
+                this.objectDrawingAdapters.put(drobj, createViewerAdapterFor(drobj));
             }
         }
         repaint();
@@ -301,18 +331,8 @@ public class DrawingViewer {
         return drawing.getTopmostDrawingObjectAt(displayToObj(pt));
     }
 
-    protected DrawingObjectViewerAdapter createDrawingAdapterFor(DrawingObject drobj) {
-        /*
-         * TODO: use externally configurable DrawingObject class => adapter
-         * class mapping instead of hard-coding the factory method like this
-         */
-        if (drobj instanceof EllipseObject) {
-            return new EllipseObjectViewerAdapter(this, (EllipseObject) drobj);
-        } else if (drobj instanceof RectangleObject) {
-            return new RectangleObjectViewerAdapter(this, (RectangleObject) drobj);
-        } else {
-            return new DrawingObjectViewerAdapter(this, drobj);
-        }
+    protected DrawingObjectViewerAdapter createViewerAdapterFor(DrawingObject drobj) {
+        return viewerAdapterFactory.createAdapterFor(this, drobj);
     }
 
     public DrawingObjectViewerAdapter getDrawingAdapterFor(DrawingObject drobj) {
@@ -332,7 +352,7 @@ public class DrawingViewer {
                     // new DrawingObject added to our drawing => create
                     // corresponding adapter, schedule repainting of affected
                     // area
-                    objectDrawingAdapters.put(de.getObject(), createDrawingAdapterFor(de.getObject()));
+                    objectDrawingAdapters.put(de.getObject(), createViewerAdapterFor(de.getObject()));
                     repaintObjectArea(de.getObject());
                 }
             } else if (e instanceof DrawingObjectRemoveEvent) {

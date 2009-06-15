@@ -1,10 +1,9 @@
-package de.sofd.draw2d.viewer;
+package de.sofd.draw2d.viewer.adapters;
 
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 
 import de.sofd.draw2d.DrawingObject;
-import de.sofd.draw2d.viewer.adapters.DrawingObjectViewerAdapter;
 import de.sofd.draw2d.viewer.tools.DrawingViewerTool;
 import de.sofd.draw2d.viewer.tools.SelectorTool;
 

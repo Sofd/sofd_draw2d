@@ -14,9 +14,45 @@ import de.sofd.draw2d.DrawingObject;
 import de.sofd.draw2d.Location;
 import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.viewer.DrawingViewer;
-import de.sofd.draw2d.viewer.MouseHandle;
+import de.sofd.draw2d.viewer.tools.DrawingViewerTool;
 
-
+/**
+ * Base class for drawing object viewer adapters, which handle things like
+ * drawing, mouse hit testing and mouse handle definition for a
+ * {@link DrawingObject} inside a {@link DrawingViewer}.
+ * <p>
+ * A DrawingViewer does not itself know how to draw any of the DrawingObjects in
+ * its Drawing, nor does it know about things like the objects' bounding boxes
+ * (which DrawingViewer uses to determine when an object actually needs to be
+ * redrawn -- it doesn't if its bounding box doesn't intersect the area in need
+ * of redrawing), where the "interior" of an object is (relevant for mouse hit
+ * testing) or what "mouse dragging handles" (see {@link MouseHandle} class) an
+ * object provides. Instead, the viewer delegates drawing of the DrawingObjects
+ * (including visual feedback of "selected" state etc.) and all the other tasks
+ * to per-object viewer adapters, which are instances of subclasses of this
+ * class. There is one such adapter per DrawingObject in the Drawing; the
+ * adapter knows its DrawingObject. N.B.: The DrawingViewer does not itself
+ * perform things like mouse hit testing and dragging of mouse handles. Instead,
+ * it delegates these things to its currently activated
+ * {@link DrawingViewerTool}.
+ * <p>
+ * This base class already performs reasonable default behaviour for many of the
+ * necessary tasks. When the object is selected in the viewer, this base class
+ * draws a dashed rectangle around the object's outline, and it draws small
+ * squares for all the mouse handles of the object. The base class itself
+ * defines 4 handles at the four corner points of the object's outline, which
+ * when dragged change the bounding box accordingly.
+ * <p>
+ * If you've written a new DrawingObject subclass, you should write a
+ * corresponding {@link DrawingObjectViewerAdapter} subclass for it, and
+ * override at least the {@link #paintObjectOn(Graphics2D)} method with the code
+ * that draws your object. You must then define your own
+ * {@link ObjectViewerAdapterFactory} (most likely you'll subclass
+ * {@link DefaultObjectViewerAdapterFactory}), and supply that to the viewer in
+ * the constructor.
+ * 
+ * @author Olaf Klischat
+ */
 public class DrawingObjectViewerAdapter {
 
     private final DrawingViewer viewer;
@@ -37,10 +73,40 @@ public class DrawingObjectViewerAdapter {
         return drawingObject;
     }
 
+    /**
+     * Paint the {@link #getDrawingObject()} of this adapter to the given
+     * Graphics2D. This should *not* also paint anything if the object is
+     * selected -- use
+     * {@link #paintSelectionVisualizationOn(Graphics2D, boolean)} for that (the
+     * reason for doing this in two methods is that DrawingViewer wants to paint
+     * the selection visualizations of selected objects above all the objects
+     * themselves). The default implementation of this method paints nothing.
+     * Your should override, or your objects will be invisible unless they're
+     * selected.
+     * 
+     * @param g2d
+     */
     public void paintObjectOn(Graphics2D g2d) {
         
     }
 
+    /**
+     * Paint the "selection visualization" for the {@link #getDrawingObject()}
+     * of this adapter. This is a separate method because DrawingViewer wants to
+     * paint the selection visualizations of selected objects above all the
+     * objects themselves.
+     * <p>
+     * The default implementation draws a dashed rectangle around a selected
+     * object's outline, and it draws small squares for all the mouse handles
+     * (defined by {@link #getHandleCount()} / {@link #getHandle(int)}) of the
+     * object. It draws nothing if the object is not selected.
+     * 
+     * @param g2d
+     *            graphics to paint onto
+     * @param isSelected
+     *            flags that tells whether the object is actually selected in
+     *            the viewer atm. Normally you'd only draw anything if it is.
+     */
     public void paintSelectionVisualizationOn(Graphics2D g2d, boolean isSelected) {
         if (isSelected) {
             g2d.setPaint(Color.GREEN);

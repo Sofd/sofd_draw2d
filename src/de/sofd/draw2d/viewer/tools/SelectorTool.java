@@ -7,8 +7,8 @@ import java.awt.geom.Point2D;
 
 import de.sofd.draw2d.DrawingObject;
 import de.sofd.draw2d.viewer.DrawingViewer;
-import de.sofd.draw2d.viewer.MouseHandle;
-import de.sofd.draw2d.viewer.NoSuchMouseHandleException;
+import de.sofd.draw2d.viewer.adapters.MouseHandle;
+import de.sofd.draw2d.viewer.adapters.NoSuchMouseHandleException;
 
 public class SelectorTool extends DrawingViewerTool {
 

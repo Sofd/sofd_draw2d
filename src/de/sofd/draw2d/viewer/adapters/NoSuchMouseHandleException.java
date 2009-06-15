@@ -1,4 +1,4 @@
-package de.sofd.draw2d.viewer;
+package de.sofd.draw2d.viewer.adapters;
 
 
 public class NoSuchMouseHandleException extends RuntimeException {
