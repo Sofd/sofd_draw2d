@@ -176,7 +176,8 @@ public class DrawingViewer {
     private static final long serialVersionUID = -5162812267404406219L;
 
     private Drawing drawing;
-    private Map<DrawingObject, DrawingObjectViewerAdapter> objectDrawingAdapters = new IdentityHashMap<DrawingObject, DrawingObjectViewerAdapter>();
+    private Map<DrawingObject, DrawingObjectViewerAdapter> objectDrawingAdapters
+        = new IdentityHashMap<DrawingObject, DrawingObjectViewerAdapter>();
     // invariant: selectedObjects is a subset of drawing.getObjects()
     private Collection<DrawingObject> selectedObjects = new IdentityHashSet<DrawingObject>();
 
@@ -246,8 +247,7 @@ public class DrawingViewer {
         if (null != this.drawing) {
             this.drawing.addDrawingListener(drawingEventHandler);
             for (DrawingObject drobj : this.drawing.getObjects()) {
-                this.objectDrawingAdapters.put(drobj,
-                        createDrawingAdapterFor(drobj));
+                this.objectDrawingAdapters.put(drobj, createDrawingAdapterFor(drobj));
             }
         }
         repaint();
@@ -259,8 +259,7 @@ public class DrawingViewer {
 
     protected void checkDrawingSet() {
         if (null == drawing) {
-            throw new IllegalStateException(
-                    "no Drawing associated with this DrawingVieweriewer");
+            throw new IllegalStateException("no Drawing associated with this DrawingVieweriewer");
         }
     }
 
@@ -299,8 +298,7 @@ public class DrawingViewer {
         return drawing.getTopmostDrawingObjectAt(displayToObj(pt));
     }
 
-    protected DrawingObjectViewerAdapter createDrawingAdapterFor(
-            DrawingObject drobj) {
+    protected DrawingObjectViewerAdapter createDrawingAdapterFor(DrawingObject drobj) {
         /*
          * TODO: use externally configurable DrawingObject class => adapter
          * class mapping instead of hard-coding the factory method like this
@@ -308,8 +306,7 @@ public class DrawingViewer {
         if (drobj instanceof EllipseObject) {
             return new EllipseObjectViewerAdapter(this, (EllipseObject) drobj);
         } else if (drobj instanceof RectangleObject) {
-            return new RectangleObjectViewerAdapter(this,
-                    (RectangleObject) drobj);
+            return new RectangleObjectViewerAdapter(this, (RectangleObject) drobj);
         } else {
             return new DrawingObjectViewerAdapter(this, drobj);
         }
@@ -332,8 +329,7 @@ public class DrawingViewer {
                     // new DrawingObject added to our drawing => create
                     // corresponding adapter, schedule repainting of affected
                     // area
-                    objectDrawingAdapters.put(de.getObject(),
-                            createDrawingAdapterFor(de.getObject()));
+                    objectDrawingAdapters.put(de.getObject(), createDrawingAdapterFor(de.getObject()));
                     repaintObjectArea(de.getObject());
                 }
             } else if (e instanceof DrawingObjectRemoveEvent) {
@@ -345,8 +341,7 @@ public class DrawingViewer {
                 }
             } else if (e instanceof DrawingObjectEvent) {
                 DrawingObjectEvent de = (DrawingObjectEvent) e;
-                objectDrawingAdapters.get(de.getSource()).onDrawingObjectEvent(
-                        de);
+                objectDrawingAdapters.get(de.getSource()).onDrawingObjectEvent(de);
             }
         }
     };
@@ -360,30 +355,24 @@ public class DrawingViewer {
     }
 
     public void setSelection(Collection<DrawingObject> drobjs) {
-        Collection<DrawingObject> toBeUnselected = new IdentityHashSet<DrawingObject>(
-                selectedObjects);
+        Collection<DrawingObject> toBeUnselected = new IdentityHashSet<DrawingObject>(selectedObjects);
         toBeUnselected.removeAll(drobjs);
-        Collection<DrawingObject> toBeSelected = new IdentityHashSet<DrawingObject>(
-                drobjs);
+        Collection<DrawingObject> toBeSelected = new IdentityHashSet<DrawingObject>(drobjs);
         toBeSelected.removeAll(selectedObjects);
         if (null != drawing) {
             toBeSelected.retainAll(drawing.getObjects());
         }
         if (!toBeUnselected.isEmpty()) {
-            fireDrawingViewerEvent(DrawingViewerSelectionChangeEvent
-                    .newBeforeObjectRemoveEvent(this, toBeUnselected));
+            fireDrawingViewerEvent(DrawingViewerSelectionChangeEvent.newBeforeObjectRemoveEvent(this, toBeUnselected));
             selectedObjects.removeAll(toBeUnselected);
             repaintObjectAreas(toBeUnselected);
-            fireDrawingViewerEvent(DrawingViewerSelectionChangeEvent
-                    .newAfterObjectRemoveEvent(this, toBeUnselected));
+            fireDrawingViewerEvent(DrawingViewerSelectionChangeEvent.newAfterObjectRemoveEvent(this, toBeUnselected));
         }
         if (!toBeSelected.isEmpty()) {
-            fireDrawingViewerEvent(DrawingViewerSelectionChangeEvent
-                    .newBeforeObjectAddEvent(this, toBeSelected));
+            fireDrawingViewerEvent(DrawingViewerSelectionChangeEvent.newBeforeObjectAddEvent(this, toBeSelected));
             selectedObjects.addAll(toBeSelected);
             repaintObjectAreas(toBeSelected);
-            fireDrawingViewerEvent(DrawingViewerSelectionChangeEvent
-                    .newAfterObjectAddEvent(this, toBeSelected));
+            fireDrawingViewerEvent(DrawingViewerSelectionChangeEvent.newAfterObjectAddEvent(this, toBeSelected));
         }
     }
 
@@ -392,8 +381,7 @@ public class DrawingViewer {
     }
 
     public void addToSelection(Collection<DrawingObject> drobjs) {
-        Collection<DrawingObject> newSelection = new IdentityHashSet<DrawingObject>(
-                selectedObjects);
+        Collection<DrawingObject> newSelection = new IdentityHashSet<DrawingObject>(selectedObjects);
         newSelection.addAll(drobjs);
         setSelection(newSelection);
     }
@@ -403,8 +391,7 @@ public class DrawingViewer {
     }
 
     public void removeFromSelection(Collection<DrawingObject> drobjs) {
-        Collection<DrawingObject> newSelection = new IdentityHashSet<DrawingObject>(
-                selectedObjects);
+        Collection<DrawingObject> newSelection = new IdentityHashSet<DrawingObject>(selectedObjects);
         newSelection.removeAll(drobjs);
         setSelection(newSelection);
     }
@@ -440,9 +427,7 @@ public class DrawingViewer {
         }
         checkDrawingSet();
         if (t.getAssociatedViewer() != null) {
-            if (t.getAssociatedViewer() == this) {
-                return;
-            }
+            if (t.getAssociatedViewer() == this) { return; }
             t.getAssociatedViewer().deactivateCurrentTool();
         }
         if (null != currentTool) {
@@ -516,8 +501,7 @@ public class DrawingViewer {
 
     private ToolMouseForwarder toolMouseForwarder = new ToolMouseForwarder();
 
-    private class ToolMouseForwarder implements MouseInputListener,
-            MouseWheelListener {
+    private class ToolMouseForwarder implements MouseInputListener, MouseWheelListener {
 
         @Override
         public void mouseClicked(MouseEvent e) {
@@ -583,8 +567,7 @@ public class DrawingViewer {
      * @param dobj
      */
     protected void repaintObjectArea(DrawingObject drobj) {
-        Rectangle bounds = getDrawingAdapterFor(drobj).getBounds2DDisp()
-                .getBounds();
+        Rectangle bounds = getDrawingAdapterFor(drobj).getBounds2DDisp().getBounds();
         repaint(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
@@ -634,8 +617,7 @@ public class DrawingViewer {
             return;
         }
         for (DrawingObject drobj : drawing.getObjects()) {
-            DrawingObjectViewerAdapter drawingAdapter = objectDrawingAdapters
-                    .get(drobj);
+            DrawingObjectViewerAdapter drawingAdapter = objectDrawingAdapters.get(drobj);
             assert drawingAdapter != null;
             Rectangle clip = g2d.getClipBounds();
             if (clip != null && !drawingAdapter.intersectsDisp(clip)) {
@@ -646,15 +628,13 @@ public class DrawingViewer {
         // paint the selection visualizations on top of all the objects'
         // outlines themselves
         for (DrawingObject drobj : drawing.getObjects()) {
-            DrawingObjectViewerAdapter drawingAdapter = objectDrawingAdapters
-                    .get(drobj);
+            DrawingObjectViewerAdapter drawingAdapter = objectDrawingAdapters.get(drobj);
             assert drawingAdapter != null;
             Rectangle clip = g2d.getClipBounds();
             if (clip != null && !drawingAdapter.intersectsDisp(clip)) {
                 continue;
             }
-            drawingAdapter.paintSelectionVisualizationOn((Graphics2D) g2d
-                    .create(), isSelected(drobj));
+            drawingAdapter.paintSelectionVisualizationOn((Graphics2D) g2d.create(), isSelected(drobj));
         }
     }
 
