@@ -4,7 +4,10 @@ import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.sofd.draw2d.event.DrawingObjectColorChangeEvent;
 import de.sofd.draw2d.event.DrawingObjectEvent;
@@ -33,6 +36,8 @@ public abstract class DrawingObject {
     private final Location location = new Location(0,0,0,0);
     
     private Color color = Color.RED;
+    
+    private final Map<String, Object> tags = new HashMap<String, Object>();
 
     /**
      * Gives the current 2D location of this object, as a rectangular bounding
@@ -128,6 +133,22 @@ public abstract class DrawingObject {
     
     public boolean contains(Point2D pt) {
         return getBounds2D().contains(pt);
+    }
+    
+    public void setTag(String name, Object value) {
+        tags.put(name, value);
+    }
+    
+    public void deleteTag(String name) {
+        tags.remove(name);
+    }
+    
+    public Object getTag(String name) {
+        return tags.get(name);
+    }
+    
+    public Collection<String> getAllTagNames() {
+        return tags.keySet();
     }
     
     public void addDrawingObjectListener(DrawingObjectListener l) {
