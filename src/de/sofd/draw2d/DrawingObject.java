@@ -56,18 +56,29 @@ public abstract class DrawingObject {
      * used to change the position or the dimensions of the object, or both.
      * <p>
      * The default implementation stores the location in an internal member
-     * variable, calls {@link #onLocationChanged(Rectangle2D)}, and also fires
+     * variable, calls {@link #onLocationChanged(Rectangle2D)} and
+     * {@link #onLocationChangedAfterEvents(Location)}, and also fires
      * {@link DrawingObjectLocationChangeEvent}s before and after the change
      * correctly. Subclasses would normally override
-     * {@link #onLocationChanged(Rectangle2D)} to implement specific
+     * {@link #onLocationChanged(Rectangle2D)} or
+     * {@link #onLocationChangedAfterEvents(Location)} to implement specific
      * functionality that should take place when the location changes. However,
      * they may also override (replace) both {@link #getLocation()} and
      * {@link #setLocation(Rectangle2D)} in concert and change/store the
      * location in whatever fashion they like. In that case, the subclass is
      * responsible for firing the correct events and calling
-     * {@link #onLocationChanged(Rectangle2D)}.
+     * {@link #onLocationChanged(Rectangle2D)} and
+     * {@link #onLocationChangedAfterEvents(Location)}.
+     * <p>
+     * All other location-changing methods (
+     * {@link #setLocation(Point2D, Point2D)},
+     * {@link #setLocation(double, double, double, double)},
+     * {@link #setLocationPt(int, Point2D)}, {@link #moveBy(double, double)})
+     * are just convenience wrappers around this method; they're all guaranteed
+     * to ultimately call this one.
      * 
-     * @param newLocation new location for this object
+     * @param newLocation
+     *            new location for this object
      */
     public void setLocation(Location newLocation) {
         Location oldLocation = new Location(this.location);
@@ -75,6 +86,7 @@ public abstract class DrawingObject {
         this.location.setLocation(newLocation);
         onLocationChanged(oldLocation);
         fireDrawingObjectEvent(new DrawingObjectLocationChangeEvent(this, false, oldLocation, newLocation));
+        onLocationChangedAfterEvents(oldLocation);
     }
     
     public void setLocation(double x1, double y1, double x2, double y2) {
@@ -117,6 +129,21 @@ public abstract class DrawingObject {
      *            oldLocation
      */
     protected void onLocationChanged(Location oldLocation) {
+        //
+    }
+
+    /**
+     * Called immediately after this DrawingObject's {@link #getLocation()} has
+     * changed and all post-change {@link DrawingObjectLocationChangeEvent}
+     * listeners have been invoked. The new position is in
+     * {@link #getLocation()}; oldLocation is the previous location.
+     * <p>
+     * DrawingObject's implementation of this method does nothing.
+     * 
+     * @param oldLocation
+     *            oldLocation
+     */
+    protected void onLocationChangedAfterEvents(Location oldLocation) {
         //
     }
     

@@ -2,6 +2,7 @@ package de.sofd.draw2d.viewer.adapters;
 
 import de.sofd.draw2d.DrawingObject;
 import de.sofd.draw2d.EllipseObject;
+import de.sofd.draw2d.PolygonObject;
 import de.sofd.draw2d.RectangleObject;
 import de.sofd.draw2d.viewer.DrawingViewer;
 
@@ -27,6 +28,8 @@ public class DefaultObjectViewerAdapterFactory implements ObjectViewerAdapterFac
             return new EllipseObjectViewerAdapter(viewer, (EllipseObject) drawingObject);
         } else if (drawingObject instanceof RectangleObject) {
             return new RectangleObjectViewerAdapter(viewer, (RectangleObject) drawingObject);
+        } else if (drawingObject instanceof PolygonObject) {
+            return new PolygonObjectViewerAdapter(viewer, (PolygonObject) drawingObject);
         } else {
             return new DrawingObjectViewerAdapter(viewer, drawingObject);
         }

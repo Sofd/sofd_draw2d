@@ -1,5 +1,6 @@
 package de.sofd.draw2d;
 
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
@@ -8,7 +9,7 @@ import de.sofd.draw2d.event.PolygonPointAddEvent;
 public class PolygonObject extends DrawingObject {
 
     private ArrayList<Point2D> points = new ArrayList<Point2D>();
-    private boolean isClosed = false;
+    private boolean isClosed = true;
 
     /**
      * during "internal" location changes (i.e. changes to the bounding box as a
@@ -18,7 +19,6 @@ public class PolygonObject extends DrawingObject {
      */
     private boolean inInternalSetLocation = false;
     
-
     protected void runInInternalSetLocation(Runnable r) {
         boolean oldValue = inInternalSetLocation;
         inInternalSetLocation = true;
@@ -108,11 +108,44 @@ public class PolygonObject extends DrawingObject {
         }
     }
 
+    private void movePoint(int ptIndex, Point2D newPt, boolean adjustBounds) {
+        points.set(ptIndex, (Point2D) newPt.clone());
+        // TODO: implement adjustBounds == true
+    }
+    
     @Override
-    protected void onLocationChanged(Location oldLocation) {
+    protected void onLocationChangedAfterEvents(Location oldLocation) {
         if (!inInternalSetLocation) {
-            // scale the points
+            // scale all the points
+            Location newLocation = getLocation();
+            AffineTransform t = getLocationTransform(oldLocation, newLocation);
+            int count = getPointCount();
+            for (int i = 0; i < count; ++i) {
+                Point2D newPt = t.transform(points.get(i), null);
+                movePoint(i, newPt, false);
+            }
         }
+    }
+    
+    private AffineTransform getLocationTransform(Location fromLoc, Location toLoc) {
+        AffineTransform result = new AffineTransform();
+        result.translate(toLoc.getPt0().getX(), toLoc.getPt0().getY());
+        double oldWidth = fromLoc.getPt2().getX() - fromLoc.getPt0().getX();
+        double oldHeight = fromLoc.getPt2().getY() - fromLoc.getPt0().getY();
+        double newWidth = toLoc.getPt2().getX() - toLoc.getPt0().getX();
+        double newHeight = toLoc.getPt2().getY() - toLoc.getPt0().getY();
+        if (Math.abs(oldWidth) > 1e-20) {
+            result.scale(newWidth / oldWidth, 1.0);
+        }
+        if (Math.abs(oldHeight) > 1e-20) {
+            result.scale(1.0, newHeight / oldHeight);
+        }
+        result.translate(- fromLoc.getPt0().getX(), - fromLoc.getPt0().getY());
+        return result;
+    }
+    
+    public boolean isClosed() {
+        return isClosed;
     }
 
 }
