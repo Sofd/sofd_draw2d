@@ -232,8 +232,6 @@ public class DrawingObjectViewerAdapter {
     
     public MouseHandle getHandle(int i) {
         if (i >= 0 && i < 4) {
-            Point2D position = drawingObject.getLocation().getPt(i);
-            viewer.getObjectToDisplayTransform().transform(position, position);
             return new BoundsHandle(i);
         } else {
             return null;

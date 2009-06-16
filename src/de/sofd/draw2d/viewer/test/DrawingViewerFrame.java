@@ -47,10 +47,10 @@ public class DrawingViewerFrame extends JFrame {
 
     private void updateViewerTransform() {
         AffineTransform t = new AffineTransform();
-        t.scale(currZoom, currZoom);
         t.translate(currZoom * 256, currZoom * 256);
         t.rotate(currRot);
-        t.translate(- currZoom * 256, - currZoom * 256);
+        t.scale(currZoom, currZoom);
+        t.translate(-256, -256);
         viewer.setObjectToDisplayTransform(t);
     }
     
@@ -126,7 +126,7 @@ public class DrawingViewerFrame extends JFrame {
         rotSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                rotValueLabel.setText(""+rotSlider.getValue()+"° ");
+                rotValueLabel.setText(""+rotSlider.getValue()+"\u00b0 ");
                 currRot = (double)rotSlider.getValue() / 360.0 * 2 * Math.PI;
                 updateViewerTransform();
             }
