@@ -165,7 +165,43 @@ public class Location {
         this.x2 = other.x2;
         this.y2 = other.y2;
     }
-    
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        long temp;
+        temp = Double.doubleToLongBits(x1);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(x2);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(y1);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(y2);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Location other = (Location) obj;
+        if (Double.doubleToLongBits(x1) != Double.doubleToLongBits(other.x1))
+            return false;
+        if (Double.doubleToLongBits(x2) != Double.doubleToLongBits(other.x2))
+            return false;
+        if (Double.doubleToLongBits(y1) != Double.doubleToLongBits(other.y1))
+            return false;
+        if (Double.doubleToLongBits(y2) != Double.doubleToLongBits(other.y2))
+            return false;
+        return true;
+    }
+
     @Override
     public String toString() {
         return "Loc[(" + x1 + "," + y1 + ") -- (" + x2 + "," + y2 + ")]";
