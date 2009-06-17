@@ -4,6 +4,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
+import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.event.PolygonPointAddEvent;
 
 public class PolygonObject extends DrawingObject {
@@ -123,6 +124,9 @@ public class PolygonObject extends DrawingObject {
             for (int i = 0; i < count; ++i) {
                 Point2D newPt = t.transform(points.get(i), null);
                 movePoint(i, newPt, false);
+                // send just generic "something's changed" message, triggering a complete redraw.
+                // may use more specific change event later
+                fireDrawingObjectEvent(new DrawingObjectEvent(this));
             }
         }
     }
@@ -147,5 +151,43 @@ public class PolygonObject extends DrawingObject {
     public boolean isClosed() {
         return isClosed;
     }
+    
+    public void setClosed(boolean isClosed) {
+        this.isClosed = isClosed;
+        // send just generic "something's changed" message, triggering a complete redraw.
+        // may use more specific change event later
+        fireDrawingObjectEvent(new DrawingObjectEvent(this));
+    }
 
+    @Override
+    public boolean contains(Point2D pt) {
+        if (!getBounds2D().contains(pt)) { return false; }
+
+        //precise point-in-polygon test starting here
+        
+        //result true <=> beam in +x direction starting at pt crosses
+        //                the polygon's outline an odd number of times
+
+        int pointsCount = points.size();
+        if (pointsCount < 2) { return false; }
+        Point2D prevVertex = points.get(0);
+        int nCrosses = 0;
+        // for each edge (prevVertex---vertex)
+        for (int i = 1; i <= pointsCount; i++) {
+            Point2D vertex = points.get(i==pointsCount ? 0 : i);
+            if ((prevVertex.getY() > pt.getY()) == (vertex.getY() > pt.getY())) {
+                prevVertex = vertex;
+                // edge lies completely inside one of the two half spaces defined by the beam
+                continue;
+            }
+            double crossX = prevVertex.getX() + (vertex.getX()-prevVertex.getX())*(pt.getY()-prevVertex.getY())/(vertex.getY()-prevVertex.getY());
+            if (crossX > pt.getX()) {
+                nCrosses++;
+            }
+
+            prevVertex = vertex;
+        }
+        return nCrosses%2 == 1;
+    }
+    
 }
