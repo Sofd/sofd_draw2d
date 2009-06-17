@@ -25,7 +25,9 @@ import javax.swing.event.ChangeListener;
 
 import de.sofd.draw2d.Drawing;
 import de.sofd.draw2d.DrawingObject;
+import de.sofd.draw2d.PolygonObject;
 import de.sofd.draw2d.viewer.tools.EllipseTool;
+import de.sofd.draw2d.viewer.tools.PolygonTool;
 import de.sofd.draw2d.viewer.tools.RectangleTool;
 import de.sofd.draw2d.viewer.tools.SelectorTool;
 
@@ -91,6 +93,19 @@ public class DrawingViewerFrame extends JFrame {
                         DrawingObject ell = super.createNewObject();
                         ell.setColor(currColor);
                         return ell;
+                    }
+                });
+            }
+        });
+        toolbar.add(new AbstractAction("Ply") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                viewer.activateTool(new PolygonTool() {
+                    @Override
+                    protected PolygonObject createNewPolygon() {
+                        PolygonObject poly = super.createNewPolygon();
+                        poly.setColor(currColor);
+                        return poly;
                     }
                 });
             }
