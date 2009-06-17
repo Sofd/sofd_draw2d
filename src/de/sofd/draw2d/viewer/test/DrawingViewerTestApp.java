@@ -27,12 +27,14 @@ public class DrawingViewerTestApp {
         ell2.setColor(Color.YELLOW);
         
         PolygonObject poly = getTestPolygon();
+        PolygonObject poly2 = getTestPolygon2();
 
         Drawing dr = new Drawing();
         dr.addDrawingObject(rect);
         dr.addDrawingObject(ellipse);
         dr.addDrawingObject(ell2);
         dr.addDrawingObject(poly);
+        dr.addDrawingObject(poly2);
         
         DrawingViewerFrame frame1 = new DrawingViewerFrame("Viewer 1", dr);
         frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -66,6 +68,19 @@ public class DrawingViewerTestApp {
         return result;
     }
     
+    private PolygonObject getTestPolygon2() {
+        double centerx = 180, centery = 200, r0 = 90, r1 = 100;
+        int nPoints = 360;
+        
+        PolygonObject result = new PolygonObject();
+        for (int i = 0; i < nPoints; ++i) {
+            double r = (i%2 == 0 ? r0 : r1);
+            double w = 2 * Math.PI * i / nPoints;
+            result.appendPoint(new Point2D.Double(centerx + r * Math.cos(w), centery + r * Math.sin(w)));
+        }
+        result.setColor(Color.CYAN);
+        return result;
+    }
 
     /**
      * @param args
