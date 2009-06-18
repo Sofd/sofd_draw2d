@@ -28,6 +28,7 @@ public class DrawingViewerTestApp {
         
         PolygonObject poly = getTestPolygon();
         PolygonObject poly2 = getTestPolygon2();
+        PolygonObject poly3 = getLocationBugTestPolygon();
 
         Drawing dr = new Drawing();
         dr.addDrawingObject(rect);
@@ -35,6 +36,7 @@ public class DrawingViewerTestApp {
         dr.addDrawingObject(ell2);
         dr.addDrawingObject(poly);
         dr.addDrawingObject(poly2);
+        dr.addDrawingObject(poly3);
         
         DrawingViewerFrame frame1 = new DrawingViewerFrame("Viewer 1", dr);
         frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -82,6 +84,19 @@ public class DrawingViewerTestApp {
         return result;
     }
 
+    private PolygonObject getLocationBugTestPolygon() {
+        PolygonObject result = new PolygonObject();
+        result.appendPoint(new Point2D.Double(210, 200));
+        result.appendPoint(new Point2D.Double(130, 180));
+        result.appendPoint(new Point2D.Double(150, 180));
+        result.appendPoint(new Point2D.Double(40, 30));
+        //result.appendPoint(new Point2D.Double(42, 30));
+        System.out.println("loc: " + result.getLocation());
+        result.setClosed(true);
+        result.setColor(Color.YELLOW);
+        return result;
+    }
+    
     /**
      * @param args
      */

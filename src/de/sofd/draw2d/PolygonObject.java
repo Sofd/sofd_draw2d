@@ -78,8 +78,15 @@ public class PolygonObject extends DrawingObject {
 
         Point2D leftmostPt = getLocationPt(leftmostPtIndex);
         Point2D rightmostPt = getLocationPt(rightmostPtIndex);
-        Point2D topmostPt = getLocationPt(topmostPtIndex);
-        Point2D bottommostPt = getLocationPt(bottommostPtIndex);
+        Point2D topmostPt;
+        Point2D bottommostPt;
+        if (topmostPtIndex == leftmostPtIndex) {
+            topmostPt = leftmostPt;
+            bottommostPt = rightmostPt;
+        } else {
+            topmostPt = rightmostPt;
+            bottommostPt = leftmostPt;
+        }
         
         Location newLocation = new Location(getLocation());
         boolean locationChanged = false;
