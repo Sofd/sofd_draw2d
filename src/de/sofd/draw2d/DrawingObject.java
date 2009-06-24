@@ -13,6 +13,7 @@ import de.sofd.draw2d.event.DrawingObjectColorChangeEvent;
 import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.event.DrawingObjectListener;
 import de.sofd.draw2d.event.DrawingObjectLocationChangeEvent;
+import de.sofd.draw2d.event.DrawingObjectTagChangeEvent;
 import de.sofd.draw2d.viewer.DrawingViewer;
 
 /**
@@ -163,11 +164,17 @@ public abstract class DrawingObject {
     }
     
     public void setTag(String name, Object value) {
+        Object oldValue = getTag(name);
+        fireDrawingObjectEvent(DrawingObjectTagChangeEvent.newBeforeChangeEvent(this, name, oldValue, value));
         tags.put(name, value);
+        fireDrawingObjectEvent(DrawingObjectTagChangeEvent.newAfterChangeEvent(this, name, oldValue, value));
     }
     
     public void deleteTag(String name) {
+        Object oldValue = getTag(name);
+        fireDrawingObjectEvent(DrawingObjectTagChangeEvent.newBeforeChangeEvent(this, name, oldValue, null));
         tags.remove(name);
+        fireDrawingObjectEvent(DrawingObjectTagChangeEvent.newAfterChangeEvent(this, name, oldValue, null));
     }
     
     public Object getTag(String name) {
