@@ -2,8 +2,11 @@ package de.sofd.draw2d;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EventObject;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.sofd.draw2d.event.DrawingListener;
 import de.sofd.draw2d.event.DrawingObjectAddOrMoveEvent;
@@ -34,6 +37,8 @@ public class Drawing {
     // TODO: a LinkedIdentityHashSet would be better here (as soon as we've implemented it)
     private final List<DrawingObject> drawingObjects = new ArrayList<DrawingObject>();
 
+    private final Map<String, Object> tags = new HashMap<String, Object>();
+    
     /**
      * Add o to this drawing at position index in the z order. If o was already
      * in the drawing, just move it to position index in the z order.
@@ -173,6 +178,22 @@ public class Drawing {
         return null;
     }
 
+    public void setTag(String name, Object value) {
+        tags.put(name, value);
+    }
+    
+    public void deleteTag(String name) {
+        tags.remove(name);
+    }
+    
+    public Object getTag(String name) {
+        return tags.get(name);
+    }
+    
+    public Collection<String> getAllTagNames() {
+        return tags.keySet();
+    }
+    
     private final List<DrawingListener> drawingListeners =
         new ArrayList<DrawingListener>();
     
