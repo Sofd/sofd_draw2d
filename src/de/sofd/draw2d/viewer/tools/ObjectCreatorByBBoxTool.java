@@ -14,6 +14,10 @@ import de.sofd.draw2d.viewer.DrawingViewer;
  * everything else, for example, it will call
  * {@link DrawingObject#setLocation(de.sofd.draw2d.Location)} on the new object
  * continuously as the user drags the box.
+ * <p>
+ * Sets the {@link TagNames#TN_CREATION_COMPLETED} tag whenever a new object
+ * has been completed (i.e., the user released the mouse button
+ * after dragging open the bounding box).
  * 
  * @author olaf
  */
@@ -63,6 +67,9 @@ public abstract class ObjectCreatorByBBoxTool extends DrawingViewerTool {
     
     @Override
     public void mouseReleased(MouseEvent e) {
+        if (null != currentObject) {
+            currentObject.setTag(TagNames.TN_CREATION_COMPLETED, true);
+        }
     }
     
 }

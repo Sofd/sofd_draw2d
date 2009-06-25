@@ -27,6 +27,7 @@ import de.sofd.draw2d.event.DrawingListener;
 import de.sofd.draw2d.event.DrawingObjectAddOrMoveEvent;
 import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.event.DrawingObjectRemoveEvent;
+import de.sofd.draw2d.event.DrawingObjectTagChangeEvent;
 
 public class DrawingListEditorFrame extends JFrame {
 
@@ -227,6 +228,13 @@ public class DrawingListEditorFrame extends JFrame {
                 }
             } else if (e instanceof DrawingObjectEvent) {
                 drawingEditorList.repaint();
+                if (e instanceof DrawingObjectTagChangeEvent) {
+                    DrawingObjectTagChangeEvent tce = (DrawingObjectTagChangeEvent) e;
+                    if (tce.isAfterChange()) {
+                        System.out.println("DrawingObject " + tce.getSource() + ": tag " + tce.getTagName() +
+                                " changed from " + tce.getLastValue() + " to " + tce.getNewValue());
+                    }
+                }
             }
         }
     };

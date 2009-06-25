@@ -7,6 +7,17 @@ import java.awt.geom.Point2D;
 import de.sofd.draw2d.PolygonObject;
 import de.sofd.draw2d.viewer.DrawingViewer;
 
+/**
+ * DrawingViewerTool that allows the end user to interactively create closed
+ * {@link PolygonObject}s on the drawing by dragging the outline of the
+ * new polygon with the mouse. After the user releases the mouse button,
+ * the polygon is closed and its creation is complete.
+ * <p>
+ * Sets the {@link TagNames#TN_CREATION_COMPLETED} tag whenever a new polygon
+ * has been completed.
+ *
+ * @author olaf
+ */
 public class PolygonTool extends DrawingViewerTool {
 
     /**
@@ -69,6 +80,7 @@ public class PolygonTool extends DrawingViewerTool {
     public void mouseReleased(MouseEvent e) {
         if (null != currentPolygon) {
             currentPolygon.setClosed(true);
+            currentPolygon.setTag(TagNames.TN_CREATION_COMPLETED, true);
             currentPolygon = null;
         }
     }

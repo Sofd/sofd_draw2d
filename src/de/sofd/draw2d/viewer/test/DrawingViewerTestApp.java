@@ -91,7 +91,6 @@ public class DrawingViewerTestApp {
         result.appendPoint(new Point2D.Double(150, 180));
         result.appendPoint(new Point2D.Double(40, 30));
         //result.appendPoint(new Point2D.Double(42, 30));
-        System.out.println("loc: " + result.getLocation());
         result.setClosed(true);
         result.setColor(Color.YELLOW);
         return result;
