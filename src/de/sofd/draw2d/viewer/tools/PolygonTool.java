@@ -80,8 +80,9 @@ public class PolygonTool extends DrawingViewerTool {
     public void mouseReleased(MouseEvent e) {
         if (null != currentPolygon) {
             currentPolygon.setClosed(true);
-            currentPolygon.setTag(TagNames.TN_CREATION_COMPLETED, true);
+            PolygonObject p = currentPolygon;
             currentPolygon = null;
+            p.setTag(TagNames.TN_CREATION_COMPLETED, true);
         }
     }
 
