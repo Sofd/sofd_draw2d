@@ -1,5 +1,6 @@
 package de.sofd.draw2d;
 
+import de.sofd.draw2d.event.ChangeRejectedException;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -83,11 +84,12 @@ public abstract class DrawingObject {
      */
     public void setLocation(Location newLocation) {
         Location oldLocation = new Location(this.location);
-        fireDrawingObjectEvent(new DrawingObjectLocationChangeEvent(this, true, oldLocation, newLocation));
-        this.location.setLocation(newLocation);
-        onLocationChanged(oldLocation);
-        fireDrawingObjectEvent(new DrawingObjectLocationChangeEvent(this, false, oldLocation, newLocation));
-        onLocationChangedAfterEvents(oldLocation);
+        if (fireDrawingObjectEvent(new DrawingObjectLocationChangeEvent(this, true, oldLocation, newLocation))) {
+            this.location.setLocation(newLocation);
+            onLocationChanged(oldLocation);
+            fireDrawingObjectEvent(new DrawingObjectLocationChangeEvent(this, false, oldLocation, newLocation));
+            onLocationChangedAfterEvents(oldLocation);
+        }
     }
     
     public void setLocation(double x1, double y1, double x2, double y2) {
@@ -154,9 +156,10 @@ public abstract class DrawingObject {
     
     public void setColor(Color newColor) {
         Color oldColor = this.color;
-        fireDrawingObjectEvent(DrawingObjectColorChangeEvent.newBeforeChangeEvent(this, oldColor, newColor));
-        this.color = newColor;
-        fireDrawingObjectEvent(DrawingObjectColorChangeEvent.newAfterChangeEvent(this, oldColor, newColor));
+        if (fireDrawingObjectEvent(DrawingObjectColorChangeEvent.newBeforeChangeEvent(this, oldColor, newColor))) {
+            this.color = newColor;
+            fireDrawingObjectEvent(DrawingObjectColorChangeEvent.newAfterChangeEvent(this, oldColor, newColor));
+        }
     }
     
     public boolean contains(Point2D pt) {
@@ -165,16 +168,18 @@ public abstract class DrawingObject {
     
     public void setTag(String name, Object value) {
         Object oldValue = getTag(name);
-        fireDrawingObjectEvent(DrawingObjectTagChangeEvent.newBeforeChangeEvent(this, name, oldValue, value));
-        tags.put(name, value);
-        fireDrawingObjectEvent(DrawingObjectTagChangeEvent.newAfterChangeEvent(this, name, oldValue, value));
+        if (fireDrawingObjectEvent(DrawingObjectTagChangeEvent.newBeforeChangeEvent(this, name, oldValue, value))) {
+            tags.put(name, value);
+            fireDrawingObjectEvent(DrawingObjectTagChangeEvent.newAfterChangeEvent(this, name, oldValue, value));
+        }
     }
     
     public void deleteTag(String name) {
         Object oldValue = getTag(name);
-        fireDrawingObjectEvent(DrawingObjectTagChangeEvent.newBeforeChangeEvent(this, name, oldValue, null));
-        tags.remove(name);
-        fireDrawingObjectEvent(DrawingObjectTagChangeEvent.newAfterChangeEvent(this, name, oldValue, null));
+        if (fireDrawingObjectEvent(DrawingObjectTagChangeEvent.newBeforeChangeEvent(this, name, oldValue, null))) {
+            tags.remove(name);
+            fireDrawingObjectEvent(DrawingObjectTagChangeEvent.newAfterChangeEvent(this, name, oldValue, null));
+        }
     }
     
     public Object getTag(String name) {
@@ -192,10 +197,27 @@ public abstract class DrawingObject {
     public void removeDrawingObjectListener(DrawingObjectListener l) {
         drawingObjectListeners.remove(l);
     }
-    
-    protected void fireDrawingObjectEvent(DrawingObjectEvent e) {
-        for (DrawingObjectListener l : drawingObjectListeners) {
-            l.onDrawingObjectEvent(e);
+
+    /**
+     * Helper method for firing {@link DrawingObjectEvent}s.
+     *
+     * @param e the event
+     * @return false if e was a pre-change event and one of the listeners rejected
+     *         the event by firing {@link ChangeRejectedException} (the fired exception
+     *         will be available in {@link ChangeRejectedException#getLastException()}).
+     *         Otherwise, true (and {@link ChangeRejectedException#getLastException()} will
+     *         be reset to null).
+     */
+    protected boolean fireDrawingObjectEvent(DrawingObjectEvent e) {
+        try {
+            for (DrawingObjectListener l : drawingObjectListeners) {
+                l.onDrawingObjectEvent(e);
+            }
+            ChangeRejectedException.resetLastException();
+            return true;
+        } catch (ChangeRejectedException ex) {
+            ChangeRejectedException.setLastException(ex);
+            return false;
         }
     }
     

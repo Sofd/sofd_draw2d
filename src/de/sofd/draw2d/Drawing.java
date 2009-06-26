@@ -1,5 +1,6 @@
 package de.sofd.draw2d;
 
+import de.sofd.draw2d.event.ChangeRejectedException;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,15 +52,17 @@ public class Drawing {
     public void addDrawingObject(int index, DrawingObject o) {
         int oldIndex = drawingObjects.indexOf(o);
         if ((oldIndex != -1) && (oldIndex != index)) {
-            fireEvent(DrawingObjectAddOrMoveEvent.newBeforeObjectMoveEvent(this, oldIndex, index));
-            drawingObjects.remove(oldIndex);
-            drawingObjects.add(index, o);
-            fireEvent(DrawingObjectAddOrMoveEvent.newAfterObjectMoveEvent(this, oldIndex, index));
+            if (fireEvent(DrawingObjectAddOrMoveEvent.newBeforeObjectMoveEvent(this, oldIndex, index))) {
+                drawingObjects.remove(oldIndex);
+                drawingObjects.add(index, o);
+                fireEvent(DrawingObjectAddOrMoveEvent.newAfterObjectMoveEvent(this, oldIndex, index));
+            }
         } else if (oldIndex != index) {
-            fireEvent(DrawingObjectAddOrMoveEvent.newBeforeObjectAddEvent(this, index));
-            drawingObjects.add(index, o);
-            o.addDrawingObjectListener(drawingObjectEventForwarder);
-            fireEvent(DrawingObjectAddOrMoveEvent.newAfterObjectAddEvent(this, index));
+            if (fireEvent(DrawingObjectAddOrMoveEvent.newBeforeObjectAddEvent(this, index))) {
+                drawingObjects.add(index, o);
+                o.addDrawingObjectListener(drawingObjectEventForwarder);
+                fireEvent(DrawingObjectAddOrMoveEvent.newAfterObjectAddEvent(this, index));
+            }
         }
     }
 
@@ -107,10 +110,11 @@ public class Drawing {
      */
     public void removeDrawingObject(int index) {
         DrawingObject o = get(index);
-        fireEvent(DrawingObjectRemoveEvent.newBeforeObjectRemoveEvent(this, index));
-        drawingObjects.remove(index);
-        o.removeDrawingObjectListener(drawingObjectEventForwarder);
-        fireEvent(DrawingObjectRemoveEvent.newAfterObjectRemoveEvent(this, index));
+        if (fireEvent(DrawingObjectRemoveEvent.newBeforeObjectRemoveEvent(this, index))) {
+            drawingObjects.remove(index);
+            o.removeDrawingObjectListener(drawingObjectEventForwarder);
+            fireEvent(DrawingObjectRemoveEvent.newAfterObjectRemoveEvent(this, index));
+        }
     }
 
     public int getObjectCount() {
@@ -200,7 +204,9 @@ public class Drawing {
     private final DrawingObjectListener drawingObjectEventForwarder = new DrawingObjectListener() {
         @Override
         public void onDrawingObjectEvent(DrawingObjectEvent e) {
-            Drawing.this.fireEvent(e);
+            if (!Drawing.this.fireEvent(e)) {
+                throw ChangeRejectedException.getLastException();
+            }
         }
     };
     
@@ -212,9 +218,26 @@ public class Drawing {
         drawingListeners.remove(l);
     }
     
-    protected void fireEvent(EventObject e) {
-        for (DrawingListener l : drawingListeners) {
-            l.onDrawingEvent(e);
+    /**
+     * Helper method for firing events.
+     *
+     * @param e the event
+     * @return false if e was a pre-change event and one of the listeners rejected
+     *         the event by firing {@link ChangeRejectedException} (the fired exception
+     *         will be available in {@link ChangeRejectedException#getLastException()}).
+     *         Otherwise, true (and {@link ChangeRejectedException#getLastException()} will
+     *         be reset to null).
+     */
+    protected boolean fireEvent(EventObject e) {
+        try {
+            for (DrawingListener l : drawingListeners) {
+                l.onDrawingEvent(e);
+            }
+            ChangeRejectedException.resetLastException();
+            return true;
+        } catch (ChangeRejectedException ex) {
+            ChangeRejectedException.setLastException(ex);
+            return false;
         }
     }
 

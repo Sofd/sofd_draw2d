@@ -1,5 +1,6 @@
 package de.sofd.draw2d;
 
+import de.sofd.draw2d.event.ChangeRejectedException;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -35,6 +36,9 @@ public class PolygonObject extends DrawingObject {
             @Override
             public void run() {
                 setLocation(pt0, pt2);
+                if (null != ChangeRejectedException.getLastException()) {
+                    throw ChangeRejectedException.getLastException();
+                }
             }
         });
     }
@@ -44,6 +48,9 @@ public class PolygonObject extends DrawingObject {
             @Override
             public void run() {
                 setLocation(newLocation);
+                if (null != ChangeRejectedException.getLastException()) {
+                    throw ChangeRejectedException.getLastException();
+                }
             }
         });
     }
@@ -58,14 +65,20 @@ public class PolygonObject extends DrawingObject {
     }
     
     public void appendPoint(Point2D pt) {
-        if (points.isEmpty()) {
-            internalSetLocation(pt, pt);
-        } else {
-            expandLocationToInclude(pt);
+        try {
+            if (points.isEmpty()) {
+                internalSetLocation(pt, pt);
+            } else {
+                expandLocationToInclude(pt);
+            }
+            if (fireDrawingObjectEvent(PolygonPointAddEvent.newBeforeChangeEvent(this, getPointCount(), pt))) {
+                points.add(pt);
+                fireDrawingObjectEvent(PolygonPointAddEvent.newAfterChangeEvent(this, getPointCount() - 1, pt));
+            }
+        } catch (ChangeRejectedException e) {
+            // the initial internalSetLocation / expandLocationToInclude rejected the location change.
+            // don't add the point, do nothing.
         }
-        fireDrawingObjectEvent(PolygonPointAddEvent.newBeforeChangeEvent(this, getPointCount(), pt));
-        points.add(pt);
-        fireDrawingObjectEvent(PolygonPointAddEvent.newAfterChangeEvent(this, getPointCount() - 1, pt));
     }
     
     private void expandLocationToInclude(Point2D pt) {

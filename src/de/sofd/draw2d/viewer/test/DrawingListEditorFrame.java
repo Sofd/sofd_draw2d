@@ -23,11 +23,15 @@ import de.sofd.draw2d.DrawingObject;
 import de.sofd.draw2d.EllipseObject;
 import de.sofd.draw2d.Location;
 import de.sofd.draw2d.RectangleObject;
+import de.sofd.draw2d.event.ChangeRejectedException;
 import de.sofd.draw2d.event.DrawingListener;
 import de.sofd.draw2d.event.DrawingObjectAddOrMoveEvent;
 import de.sofd.draw2d.event.DrawingObjectEvent;
+import de.sofd.draw2d.event.DrawingObjectListener;
+import de.sofd.draw2d.event.DrawingObjectLocationChangeEvent;
 import de.sofd.draw2d.event.DrawingObjectRemoveEvent;
 import de.sofd.draw2d.event.DrawingObjectTagChangeEvent;
+import java.awt.geom.Rectangle2D;
 
 public class DrawingListEditorFrame extends JFrame {
 
@@ -66,6 +70,23 @@ public class DrawingListEditorFrame extends JFrame {
         loc.setPt2(pt2.getX() + dx, pt2.getY() + dy);
         drobj.setLocation(loc);
     }
+
+    private DrawingListener xmaxBoundaryEnforcer = new DrawingListener() {
+        @Override
+        public void onDrawingEvent(EventObject e) {
+            if (e instanceof DrawingObjectLocationChangeEvent) {
+                DrawingObjectLocationChangeEvent lce = (DrawingObjectLocationChangeEvent) e;
+                if (lce.isBeforeChange()) {
+                    Rectangle2D lastBounds = lce.getLastLocation().getBounds2D();
+                    Rectangle2D newBounds = lce.getNewLocation().getBounds2D();
+                    if ((newBounds.getMinX() > lastBounds.getMinX() || newBounds.getMaxX() > lastBounds.getMaxX()) &&
+                            (newBounds.getMinX() > 512 || newBounds.getMaxX() > 512)) {
+                        throw new ChangeRejectedException("x coordinate getting too large");
+                    }
+                }
+            }
+        }
+    };
     
     @Override
     protected void frameInit() {
@@ -180,10 +201,12 @@ public class DrawingListEditorFrame extends JFrame {
     public void setDrawing(Drawing d) {
         if (null != this.drawing) {
             this.drawing.removeDrawingListener(drawingEventHandler);
+            this.drawing.removeDrawingListener(xmaxBoundaryEnforcer);
         }
         this.drawing = d;
         if (null != this.drawing) {
             this.drawing.addDrawingListener(drawingEventHandler);
+            this.drawing.addDrawingListener(xmaxBoundaryEnforcer);
         }
         reinitEditorList();
     }
