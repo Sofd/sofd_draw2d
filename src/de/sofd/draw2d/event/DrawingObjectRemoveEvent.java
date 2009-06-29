@@ -15,11 +15,13 @@ public class DrawingObjectRemoveEvent extends DrawingEvent {
 
     private final boolean isBeforeChange;
     private final int index;
+    private final DrawingObject removedObject;
 
-    protected DrawingObjectRemoveEvent(Drawing source, boolean isBeforeChange, int index) {
+    protected DrawingObjectRemoveEvent(Drawing source, boolean isBeforeChange, int index, DrawingObject removedObject) {
         super(source);
         this.isBeforeChange = isBeforeChange;
         this.index = index;
+        this.removedObject = removedObject;
     }
 
     /**
@@ -55,19 +57,20 @@ public class DrawingObjectRemoveEvent extends DrawingEvent {
      *         from the Drawing (which is, if {@link #isBeforeChange()})
      */
     public DrawingObject getObject() {
-        if (!isBeforeChange) {
-            throw new IllegalStateException("can't determine removed DrawingObject for an after-DrawingObjectRemove event");
+        if (isBeforeChange) {
+            return getSource().get(getIndex());
+        } else {
+            return removedObject;
         }
-        return getSource().get(getIndex());
     }
     
     // public "constructors"
 
     public static DrawingObjectRemoveEvent newBeforeObjectRemoveEvent(Drawing source, int index) {
-        return new DrawingObjectRemoveEvent(source, true, index);
+        return new DrawingObjectRemoveEvent(source, true, index, null);
     }
 
-    public static DrawingObjectRemoveEvent newAfterObjectRemoveEvent(Drawing source, int index) {
-        return new DrawingObjectRemoveEvent(source, false, index);
+    public static DrawingObjectRemoveEvent newAfterObjectRemoveEvent(Drawing source, int index, DrawingObject removedObject) {
+        return new DrawingObjectRemoveEvent(source, false, index, removedObject);
     }
 }

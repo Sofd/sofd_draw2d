@@ -111,9 +111,9 @@ public class Drawing {
     public void removeDrawingObject(int index) {
         DrawingObject o = get(index);
         if (fireEvent(DrawingObjectRemoveEvent.newBeforeObjectRemoveEvent(this, index))) {
-            drawingObjects.remove(index);
+            DrawingObject removedObject = drawingObjects.remove(index);
             o.removeDrawingObjectListener(drawingObjectEventForwarder);
-            fireEvent(DrawingObjectRemoveEvent.newAfterObjectRemoveEvent(this, index));
+            fireEvent(DrawingObjectRemoveEvent.newAfterObjectRemoveEvent(this, index, removedObject));
         }
     }
 
