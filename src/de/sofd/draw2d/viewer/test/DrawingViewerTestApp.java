@@ -50,7 +50,7 @@ public class DrawingViewerTestApp {
         frame2.setVisible(true);
         
         DrawingListEditorFrame drEdFrame = new DrawingListEditorFrame(dr);
-        drEdFrame.setBounds(50, 550, 500, 300);
+        drEdFrame.setBounds(50, 600, 700, 300);
         drEdFrame.setVisible(true);
     }
     

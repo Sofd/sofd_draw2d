@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 import java.awt.geom.Point2D;
 import java.util.EventObject;
 
@@ -15,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -27,11 +29,14 @@ import de.sofd.draw2d.event.ChangeRejectedException;
 import de.sofd.draw2d.event.DrawingListener;
 import de.sofd.draw2d.event.DrawingObjectAddOrMoveEvent;
 import de.sofd.draw2d.event.DrawingObjectEvent;
-import de.sofd.draw2d.event.DrawingObjectListener;
 import de.sofd.draw2d.event.DrawingObjectLocationChangeEvent;
 import de.sofd.draw2d.event.DrawingObjectRemoveEvent;
 import de.sofd.draw2d.event.DrawingObjectTagChangeEvent;
+import de.sofd.draw2d.viewer.tools.TagNames;
+import java.awt.event.ItemListener;
 import java.awt.geom.Rectangle2D;
+import javax.swing.JCheckBox;
+import javax.swing.SwingUtilities;
 
 public class DrawingListEditorFrame extends JFrame {
 
@@ -71,6 +76,22 @@ public class DrawingListEditorFrame extends JFrame {
         drobj.setLocation(loc);
     }
 
+    protected void addCheckboxTo(JToolBar toolbar, String label, final boolean initialState, ItemListener itemListener) {
+        final JCheckBox cb = new JCheckBox(label);
+        toolbar.add(cb);
+        cb.getModel().setSelected(!initialState);
+        cb.addItemListener(itemListener);
+        // trigger initial changedListener call to run after this event cycle has completed
+        // so that in case addCheckboxTo() was called from the constructor or frameInit().
+        // the listener runs after the the constructor has completed
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                cb.getModel().setSelected(initialState);
+            }
+        });
+    }
+
     private DrawingListener xmaxBoundaryEnforcer = new DrawingListener() {
         @Override
         public void onDrawingEvent(EventObject e) {
@@ -88,6 +109,25 @@ public class DrawingListEditorFrame extends JFrame {
         }
     };
     
+    private DrawingListener removeOnCreationHandler = new DrawingListener() {
+        @Override
+        public void onDrawingEvent(EventObject e) {
+            if (e instanceof DrawingObjectTagChangeEvent) {
+                DrawingObjectTagChangeEvent tce = (DrawingObjectTagChangeEvent) e;
+                if (tce.isAfterChange() && tce.getTagName() == TagNames.TN_CREATION_COMPLETED) {
+                    // user has completed creation of a new ROI
+                    final DrawingObject newObj = tce.getSource();
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            drawing.removeDrawingObject(newObj);
+                        }
+                    });
+                }
+            }
+        }
+    };
+
     @Override
     protected void frameInit() {
         super.frameInit();
@@ -184,6 +224,28 @@ public class DrawingListEditorFrame extends JFrame {
                 drawing.addDrawingObject(new EllipseObject(50,50,150,100));
             }
         });
+        addCheckboxTo(toolbar, "xmax512", true, new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                JCheckBox src = (JCheckBox) e.getSource();
+                if (src.isSelected()) {
+                    drawing.addDrawingListener(xmaxBoundaryEnforcer);
+                } else {
+                    drawing.removeDrawingListener(xmaxBoundaryEnforcer);
+                }
+            }
+        });
+        addCheckboxTo(toolbar, "rmOnCreat", false, new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                JCheckBox src = (JCheckBox) e.getSource();
+                if (src.isSelected()) {
+                    drawing.addDrawingListener(removeOnCreationHandler);
+                } else {
+                    drawing.removeDrawingListener(removeOnCreationHandler);
+                }
+            }
+        });
 
         getContentPane().add(toolbar, BorderLayout.PAGE_START);
         getContentPane().add(drawingEditorList, BorderLayout.CENTER);
@@ -199,6 +261,7 @@ public class DrawingListEditorFrame extends JFrame {
     }
     
     public void setDrawing(Drawing d) {
+        if (d == this.drawing) { return; }
         if (null != this.drawing) {
             this.drawing.removeDrawingListener(drawingEventHandler);
             this.drawing.removeDrawingListener(xmaxBoundaryEnforcer);
@@ -206,7 +269,8 @@ public class DrawingListEditorFrame extends JFrame {
         this.drawing = d;
         if (null != this.drawing) {
             this.drawing.addDrawingListener(drawingEventHandler);
-            this.drawing.addDrawingListener(xmaxBoundaryEnforcer);
+            // TODO this.drawing.addDrawingListener(xmaxBoundaryEnforcer); if it was in the old one
+            // TODO dito for removeOnCreationHandler
         }
         reinitEditorList();
     }
