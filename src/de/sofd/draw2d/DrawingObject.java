@@ -16,6 +16,9 @@ import de.sofd.draw2d.event.DrawingObjectListener;
 import de.sofd.draw2d.event.DrawingObjectLocationChangeEvent;
 import de.sofd.draw2d.event.DrawingObjectTagChangeEvent;
 import de.sofd.draw2d.viewer.DrawingViewer;
+import de.sofd.util.Misc;
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * Base class for vector drawing objects that live in an infinite, continuous,
@@ -30,10 +33,10 @@ import de.sofd.draw2d.viewer.DrawingViewer;
  * 
  * @author olaf
  */
-public abstract class DrawingObject {
+public abstract class DrawingObject implements Serializable, Cloneable {
     
-    private final List<DrawingObjectListener> drawingObjectListeners =
-        new ArrayList<DrawingObjectListener>();
+    private /*final*/ transient List<DrawingObjectListener> drawingObjectListeners =
+        new ArrayList<DrawingObjectListener>();  // field can't be final because of deserialization
     
     private final Location location = new Location(0,0,0,0);
     
@@ -220,5 +223,15 @@ public abstract class DrawingObject {
             return false;
         }
     }
-    
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return Misc.deepCopy(this);
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        drawingObjectListeners = new ArrayList<DrawingObjectListener>();
+        in.defaultReadObject();
+    }
+
 }

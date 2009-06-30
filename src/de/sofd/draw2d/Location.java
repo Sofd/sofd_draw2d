@@ -2,6 +2,7 @@ package de.sofd.draw2d;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.io.Serializable;
 
 /**
  * Rectangular 2D area. Like a {@link Rectangle2D}, but works correctly with
@@ -20,7 +21,7 @@ import java.awt.geom.Rectangle2D;
  * 
  * @author Olaf Klischat
  */
-public class Location {
+public class Location implements Serializable {
     
     private double x1, y1, x2, y2;
 
