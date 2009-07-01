@@ -144,10 +144,10 @@ public class PolygonObject extends DrawingObject {
             for (int i = 0; i < count; ++i) {
                 Point2D newPt = t.transform(points.get(i), null);
                 movePoint(i, newPt, false);
-                // send just generic "something's changed" message, triggering a complete redraw.
-                // may use more specific change event later
-                fireDrawingObjectEvent(new DrawingObjectEvent(this));
             }
+            // send just generic "something's changed" message, triggering a complete redraw.
+            // may use more specific change event later
+            fireDrawingObjectEvent(new DrawingObjectEvent(this));
         }
     }
     
