@@ -213,7 +213,9 @@ public abstract class DrawingObject implements Serializable, Cloneable {
      */
     protected boolean fireDrawingObjectEvent(DrawingObjectEvent e) {
         try {
-            for (DrawingObjectListener l : drawingObjectListeners) {
+            // iterate over a copy of drawingObjectListeners so a listener adding new listeners
+            // won't lead to ConcurrentModificationException
+            for (DrawingObjectListener l : drawingObjectListeners.toArray(new DrawingObjectListener[drawingObjectListeners.size()])) {
                 l.onDrawingObjectEvent(e);
             }
             ChangeRejectedException.resetLastException();
