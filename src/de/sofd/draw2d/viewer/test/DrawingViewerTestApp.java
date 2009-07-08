@@ -10,6 +10,8 @@ import de.sofd.draw2d.Drawing;
 import de.sofd.draw2d.EllipseObject;
 import de.sofd.draw2d.PolygonObject;
 import de.sofd.draw2d.RectangleObject;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class DrawingViewerTestApp {
 
@@ -38,20 +40,27 @@ public class DrawingViewerTestApp {
         dr.addDrawingObject(poly2);
         dr.addDrawingObject(poly3);
         
-        DrawingViewerFrame frame1 = new DrawingViewerFrame("Viewer 1", dr);
+        final DrawingViewerFrame frame1 = new DrawingViewerFrame("Viewer 1", dr);
         frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame1.setSize(700, 700);
         frame1.setVisible(true);
 
-        DrawingViewerFrame frame2 = new DrawingViewerFrame("Viewer 2", dr);
+        final DrawingViewerFrame frame2 = new DrawingViewerFrame("Viewer 2", dr);
         frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame2.setSize(700, 700);
         frame2.setLocation(400, 200);
         frame2.setVisible(true);
         
-        DrawingListEditorFrame drEdFrame = new DrawingListEditorFrame(dr);
+        final DrawingListEditorFrame drEdFrame = new DrawingListEditorFrame(dr);
         drEdFrame.setBounds(50, 600, 700, 300);
         drEdFrame.setVisible(true);
+        drEdFrame.addDrawingChangedListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                frame1.setDrawing(drEdFrame.getDrawing());
+                frame2.setDrawing(drEdFrame.getDrawing());
+            }
+        });
     }
     
     private PolygonObject getTestPolygon() {

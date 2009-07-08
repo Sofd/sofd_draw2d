@@ -15,6 +15,10 @@ import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.event.DrawingObjectListener;
 import de.sofd.draw2d.event.DrawingObjectRemoveEvent;
 import de.sofd.draw2d.viewer.DrawingViewer;
+import de.sofd.util.Misc;
+import java.io.IOException;
+import java.io.ObjectStreamField;
+import java.io.Serializable;
 
 /**
  * A Drawing made up of {@link DrawingObject}s. The objects are contained in a
@@ -33,7 +37,7 @@ import de.sofd.draw2d.viewer.DrawingViewer;
  * 
  * @author olaf
  */
-public class Drawing {
+public class Drawing implements Serializable {
 
     // TODO: a LinkedIdentityHashSet would be better here (as soon as we've implemented it)
     private final List<DrawingObject> drawingObjects = new ArrayList<DrawingObject>();
@@ -198,10 +202,14 @@ public class Drawing {
         return tags.keySet();
     }
     
-    private final List<DrawingListener> drawingListeners =
-        new ArrayList<DrawingListener>();
-    
-    private final DrawingObjectListener drawingObjectEventForwarder = new DrawingObjectListener() {
+    private /*final*/ transient List<DrawingListener> drawingListeners =
+        new ArrayList<DrawingListener>();  // field can't be final because of deserialization
+
+    private final DrawingObjectEventForwarderClass drawingObjectEventForwarder =
+            new DrawingObjectEventForwarderClass();
+
+    // need to define non-anonymous class for this to facilitate serialization
+    private class DrawingObjectEventForwarderClass implements DrawingObjectListener, Serializable {
         @Override
         public void onDrawingObjectEvent(DrawingObjectEvent e) {
             if (!Drawing.this.fireEvent(e)) {
@@ -238,6 +246,29 @@ public class Drawing {
         } catch (ChangeRejectedException ex) {
             ChangeRejectedException.setLastException(ex);
             return false;
+        }
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return Misc.deepCopy(this);
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        drawingListeners = new ArrayList<DrawingListener>();
+        in.defaultReadObject();
+        // the drawingObjects list was read from the stream, but all the associated processing
+        // (adding drawingObjectEventForwarder to each object, creating the DrawingAdapter for each object, etc.)
+        // wasn't done, so we're in an invalid state right now. Clear out drawingObjects and re-add
+        // all the DrawingObjects through the regular addDrawingObject method so all the necessary
+        // processing can take place.
+        // TODO: ideally, we'd read the drawingObjects field manually from the stream without
+        //   immediately setting it into this.drawingObjects, thus obviating the need to clear
+        //   out the latter. Consult the Java Object Serialization spec for how to do this.
+        ArrayList<DrawingObject> deserializedObjs = new ArrayList<DrawingObject>(drawingObjects);
+        drawingObjects.clear();
+        for (DrawingObject o : deserializedObjs) {
+            addDrawingObject(o);
         }
     }
 

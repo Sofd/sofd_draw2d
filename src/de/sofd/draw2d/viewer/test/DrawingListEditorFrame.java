@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.geom.Point2D;
 import java.util.EventObject;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.DefaultListCellRenderer;
@@ -35,8 +36,17 @@ import de.sofd.draw2d.event.DrawingObjectTagChangeEvent;
 import de.sofd.draw2d.viewer.tools.TagNames;
 import java.awt.event.ItemListener;
 import java.awt.geom.Rectangle2D;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeListener;
 
 public class DrawingListEditorFrame extends JFrame {
 
@@ -45,6 +55,7 @@ public class DrawingListEditorFrame extends JFrame {
     private Drawing drawing;
     private JList drawingEditorList;
     private DefaultListModel drawingEditorListModel;
+    private List<ChangeListener> drawingChangedListeners = new ArrayList<ChangeListener>();
     
     public DrawingListEditorFrame(Drawing drawing) throws HeadlessException {
         this("drawing list editor", drawing);
@@ -53,6 +64,14 @@ public class DrawingListEditorFrame extends JFrame {
     public DrawingListEditorFrame(String title, Drawing drawing) throws HeadlessException {
         super(title);
         setDrawing(drawing);
+    }
+
+    public void addDrawingChangedListener(ChangeListener l) {
+        drawingChangedListeners.add(l);
+    }
+
+    public void removeDrawingChangedListener(ChangeListener l) {
+        drawingChangedListeners.remove(l);
     }
 
     protected abstract class SelectedObjectAction extends AbstractAction {
@@ -136,7 +155,6 @@ public class DrawingListEditorFrame extends JFrame {
         drawingEditorList = new JList(drawingEditorListModel);
         //ListCellRenderer cr = new DefaultListCellRenderer();
         drawingEditorList.setCellRenderer(new DrawingObjectListCellRenderer());
-        drawingEditorList.addListSelectionListener(editorListSelectionHandler);
         
         JToolBar toolbar = new JToolBar("toolbar");
         toolbar.setFloatable(false);
@@ -224,6 +242,50 @@ public class DrawingListEditorFrame extends JFrame {
                 drawing.addDrawingObject(new EllipseObject(50,50,150,100));
             }
         });
+        toolbar.add(new AbstractAction("save") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fc = new JFileChooser();
+                if (JFileChooser.APPROVE_OPTION == fc.showSaveDialog(DrawingListEditorFrame.this)) {
+                    try {
+                        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fc.getSelectedFile()));
+                        try {
+                            oos.writeObject(drawing);
+                        } finally {
+                            oos.close();
+                        }
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(DrawingListEditorFrame.this,
+                                                      "Error when saving the drawing: " + ex.getLocalizedMessage(),
+                                                      "Error",
+                                                      JOptionPane.ERROR_MESSAGE);
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        });
+        toolbar.add(new AbstractAction("load") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fc = new JFileChooser();
+                if (JFileChooser.APPROVE_OPTION == fc.showOpenDialog(DrawingListEditorFrame.this)) {
+                    try {
+                        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fc.getSelectedFile()));
+                        try {
+                            setDrawing((Drawing)ois.readObject());
+                        } finally {
+                            ois.close();
+                        }
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(DrawingListEditorFrame.this,
+                                                      "Error when loading the drawing: " + ex.getLocalizedMessage(),
+                                                      "Error",
+                                                      JOptionPane.ERROR_MESSAGE);
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        });
         addCheckboxTo(toolbar, "xmax512", true, new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -259,7 +321,11 @@ public class DrawingListEditorFrame extends JFrame {
             }
         }
     }
-    
+
+    public Drawing getDrawing() {
+        return drawing;
+    }
+
     public void setDrawing(Drawing d) {
         if (d == this.drawing) { return; }
         if (null != this.drawing) {
@@ -273,6 +339,13 @@ public class DrawingListEditorFrame extends JFrame {
             // TODO dito for removeOnCreationHandler
         }
         reinitEditorList();
+        fireDrawingChanged();
+    }
+
+    protected void fireDrawingChanged() {
+        for (ChangeListener l : drawingChangedListeners) {
+            l.stateChanged(new ChangeEvent(this));
+        }
     }
 
     private static class DrawingObjectListCellRenderer extends DefaultListCellRenderer {
@@ -326,11 +399,4 @@ public class DrawingListEditorFrame extends JFrame {
         }
     };
 
-
-    private ListSelectionListener editorListSelectionHandler = new ListSelectionListener() {
-        @Override
-        public void valueChanged(ListSelectionEvent e) {
-        }
-    };
-    
 }
