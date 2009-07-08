@@ -36,6 +36,9 @@ import de.sofd.draw2d.event.DrawingObjectTagChangeEvent;
 import de.sofd.draw2d.viewer.tools.TagNames;
 import java.awt.event.ItemListener;
 import java.awt.geom.Rectangle2D;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -248,19 +251,35 @@ public class DrawingListEditorFrame extends JFrame {
                 JFileChooser fc = new JFileChooser();
                 if (JFileChooser.APPROVE_OPTION == fc.showSaveDialog(DrawingListEditorFrame.this)) {
                     try {
-                        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fc.getSelectedFile()));
-                        try {
-                            oos.writeObject(drawing);
-                        } finally {
-                            oos.close();
+                        File outfile = fc.getSelectedFile();
+                        if (outfile.getName().toLowerCase().endsWith(".xml")) {
+                            saveDrawingAsXML(outfile);
+                        } else {
+                            saveDrawingAsJavaSerialized(outfile);
                         }
-                    } catch (IOException ex) {
+                    } catch (Exception ex) {
                         JOptionPane.showMessageDialog(DrawingListEditorFrame.this,
                                                       "Error when saving the drawing: " + ex.getLocalizedMessage(),
                                                       "Error",
                                                       JOptionPane.ERROR_MESSAGE);
                         ex.printStackTrace();
                     }
+                }
+            }
+            public void saveDrawingAsJavaSerialized(File outfile) throws IOException {
+                ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(outfile));
+                try {
+                    oos.writeObject(drawing);
+                } finally {
+                    oos.close();
+                }
+            }
+            public void saveDrawingAsXML(File outfile) throws IOException {
+                XMLEncoder enc = new XMLEncoder(new FileOutputStream(outfile));
+                try {
+                    enc.writeObject(drawing);
+                } finally {
+                    enc.close();
                 }
             }
         });
@@ -270,11 +289,11 @@ public class DrawingListEditorFrame extends JFrame {
                 JFileChooser fc = new JFileChooser();
                 if (JFileChooser.APPROVE_OPTION == fc.showOpenDialog(DrawingListEditorFrame.this)) {
                     try {
-                        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fc.getSelectedFile()));
-                        try {
-                            setDrawing((Drawing)ois.readObject());
-                        } finally {
-                            ois.close();
+                        File infile = fc.getSelectedFile();
+                        if (infile.getName().toLowerCase().endsWith(".xml")) {
+                            loadDrawingFromXML(infile);
+                        } else {
+                            loadDrawingFromJavaSerialized(infile);
                         }
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(DrawingListEditorFrame.this,
@@ -283,6 +302,22 @@ public class DrawingListEditorFrame extends JFrame {
                                                       JOptionPane.ERROR_MESSAGE);
                         ex.printStackTrace();
                     }
+                }
+            }
+            public void loadDrawingFromJavaSerialized(File infile) throws Exception {
+                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(infile));
+                try {
+                    setDrawing((Drawing)ois.readObject());
+                } finally {
+                    ois.close();
+                }
+            }
+            public void loadDrawingFromXML(File infile) throws Exception {
+                XMLDecoder dec = new XMLDecoder(new FileInputStream(infile));
+                try {
+                    setDrawing((Drawing)dec.readObject());
+                } finally {
+                    dec.close();
                 }
             }
         });
