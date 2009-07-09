@@ -2,6 +2,11 @@ package de.sofd.draw2d;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.beans.DefaultPersistenceDelegate;
+import java.beans.Encoder;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.Statement;
 import java.io.Serializable;
 
 /**
@@ -69,10 +74,6 @@ public class Location implements Serializable {
         y1 = y;
     }
     
-    public void setPt0(Point2D p) {
-        setPt0(p.getX(), p.getY());
-    }
-
     public Point2D getPt1() {
         return new Point2D.Double(x2,y1);
     }
@@ -89,10 +90,6 @@ public class Location implements Serializable {
     public void setPt2(double x, double y) {
         x2 = x;
         y2 = y;
-    }
-
-    public void setPt2(Point2D p) {
-        setPt2(p.getX(), p.getY());
     }
     
     public Point2D getPt3() {
@@ -217,5 +214,25 @@ public class Location implements Serializable {
     public String toString() {
         return "Loc[(" + x1 + "," + y1 + ") -- (" + x2 + "," + y2 + ")]";
     }
-    
+
+    // provide for XML serializability via java.beans.XMLEncoder
+
+    static {
+        try {
+            Introspector.getBeanInfo(Location.class).getBeanDescriptor().setValue("persistenceDelegate", new PersistenceDelegate());
+        } catch (IntrospectionException e) {
+            throw new RuntimeException("FATAL (SHOULD NEVER HAPPEN): Can't introspect myself. Please shoot the programmer.");
+        }
+    }
+
+    public static class PersistenceDelegate extends DefaultPersistenceDelegate {
+        @Override
+        protected void initialize(Class<?> type, Object oldInstance, Object newInstance, Encoder out) {
+            super.initialize(type, oldInstance, newInstance, out);
+            Location target = (Location) oldInstance;
+            out.writeStatement(new Statement(target, "setPt0", new Object[]{target.getPt0().getX(), target.getPt0().getY()}));
+            out.writeStatement(new Statement(target, "setPt2", new Object[]{target.getPt2().getX(), target.getPt2().getY()}));
+        }
+    }
+
 }

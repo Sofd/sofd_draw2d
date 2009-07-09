@@ -7,6 +7,11 @@ import java.util.ArrayList;
 
 import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.event.PolygonPointAddEvent;
+import java.beans.DefaultPersistenceDelegate;
+import java.beans.Encoder;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.Statement;
 
 public class PolygonObject extends DrawingObject {
     
@@ -81,6 +86,10 @@ public class PolygonObject extends DrawingObject {
             // the initial internalSetLocation / expandLocationToInclude rejected the location change.
             // don't add the point, do nothing.
         }
+    }
+
+    public void appendPoint(double x, double y) {
+        appendPoint(new Point2D.Double(x, y));
     }
     
     private void expandLocationToInclude(Point2D pt) {
@@ -212,4 +221,26 @@ public class PolygonObject extends DrawingObject {
         return nCrosses%2 == 1;
     }
     
+    // provide for XML serializability via java.beans.XMLEncoder
+
+    static {
+        try {
+            Introspector.getBeanInfo(PolygonObject.class).getBeanDescriptor().setValue("persistenceDelegate", new PersistenceDelegate());
+        } catch (IntrospectionException e) {
+            throw new RuntimeException("FATAL (SHOULD NEVER HAPPEN): Can't introspect myself. Please shoot the programmer.");
+        }
+    }
+
+    public static class PersistenceDelegate extends DefaultPersistenceDelegate {
+        @Override
+        protected void initialize(Class<?> type, Object oldInstance, Object newInstance, Encoder out) {
+            super.initialize(type, oldInstance, newInstance, out);
+            PolygonObject target = (PolygonObject) oldInstance;
+            for (int i = 0; i < target.getPointCount(); i++) {
+                Point2D pt = target.getPoint(i);
+                out.writeStatement(new Statement(target, "appendPoint", new Object[]{pt.getX(), pt.getY()}));
+            }
+        }
+    }
+
 }

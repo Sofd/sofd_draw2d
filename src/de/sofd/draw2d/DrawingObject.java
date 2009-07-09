@@ -195,6 +195,27 @@ public abstract class DrawingObject implements Serializable, Cloneable {
         return tags.keySet();
     }
     
+    public Map<String,Object> getTags() {
+        return new HashMap<String, Object>(tags);
+    }
+
+    /**
+     * Completely replace this DrawingObject's tags with the supplied ones. Mainly
+     * needed for XML beans serialization, but can be used for any purpose.
+     *
+     * @param newTags
+     */
+    public void setTags(Map<String,Object> newTags) {
+        // do this properly, including firing of tagDeleted events for
+        // the old tags and tagAdded events for the new ones
+        for (String tagName : getAllTagNames()) {
+            deleteTag(tagName);
+        }
+        for (Map.Entry<String, Object> e : newTags.entrySet()) {
+            setTag(e.getKey(), e.getValue());
+        }
+    }
+
     public void addDrawingObjectListener(DrawingObjectListener l) {
         drawingObjectListeners.add(l);
     }
