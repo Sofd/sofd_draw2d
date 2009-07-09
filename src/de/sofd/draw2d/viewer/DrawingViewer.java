@@ -273,6 +273,7 @@ public class DrawingViewer {
     public void setDrawing(Drawing d) {
         if (null != this.drawing) {
             deactivateCurrentTool();
+            clearSelection();
             this.drawing.removeDrawingListener(drawingEventHandler);
             this.objectDrawingAdapters.clear();
         }
