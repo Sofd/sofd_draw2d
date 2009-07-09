@@ -23,6 +23,8 @@ import java.io.Serializable;
  */
 public class Location implements Serializable {
     
+    private static final long serialVersionUID = 8928702778990518201L;
+
     private double x1, y1, x2, y2;
 
     public Location() {
@@ -66,6 +68,10 @@ public class Location implements Serializable {
         x1 = x;
         y1 = y;
     }
+    
+    public void setPt0(Point2D p) {
+        setPt0(p.getX(), p.getY());
+    }
 
     public Point2D getPt1() {
         return new Point2D.Double(x2,y1);
@@ -85,6 +91,10 @@ public class Location implements Serializable {
         y2 = y;
     }
 
+    public void setPt2(Point2D p) {
+        setPt2(p.getX(), p.getY());
+    }
+    
     public Point2D getPt3() {
         return new Point2D.Double(x1,y2);
     }

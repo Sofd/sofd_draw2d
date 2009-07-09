@@ -1,6 +1,8 @@
 package de.sofd.draw2d;
 
 import de.sofd.draw2d.event.ChangeRejectedException;
+
+import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,7 +19,6 @@ import de.sofd.draw2d.event.DrawingObjectRemoveEvent;
 import de.sofd.draw2d.viewer.DrawingViewer;
 import de.sofd.util.Misc;
 import java.io.IOException;
-import java.io.ObjectStreamField;
 import java.io.Serializable;
 
 /**
@@ -38,6 +39,8 @@ import java.io.Serializable;
  * @author olaf
  */
 public class Drawing implements Serializable {
+
+    private static final long serialVersionUID = -2815369104571946712L;
 
     // TODO: a LinkedIdentityHashSet would be better here (as soon as we've implemented it)
     private final List<DrawingObject> drawingObjects = new ArrayList<DrawingObject>();
@@ -147,6 +150,24 @@ public class Drawing implements Serializable {
         result.addAll(drawingObjects);
         return result;
     }
+    
+    /**
+     * Completely replace this Drawing's list of DrawingObjects with the
+     * supplied ones. Mainly needed for XML beans serialization, but can be used
+     * for any purpose.
+     * 
+     * @param objs
+     */
+    public void setObjects(List<DrawingObject> objs) {
+        // do this properly, including firing of DrawingObjectRemoveEvents for
+        // the old objects and DrawingObjectAddEvents for the new ones
+        while (getObjectCount() > 0) {
+            removeDrawingObject(0);
+        }
+        for (DrawingObject o : objs) {
+            addDrawingObject(o);
+        }
+    }
 
     /**
      * 
@@ -202,6 +223,28 @@ public class Drawing implements Serializable {
         return tags.keySet();
     }
     
+    public Map<String,Object> getTags() {
+        return new HashMap<String, Object>(tags);
+    }
+
+    /**
+     * Completely replace this Drawing's tags with the supplied ones. Mainly
+     * needed for XML beans serialization, but can be used for any purpose.
+     * 
+     * @param newTags
+     */
+    public void setTags(Map<String,Object> newTags) {
+        // do this properly, including firing of tagDeleted events for
+        // the old tags and tagAdded events for the new ones (as soon
+        // as we have those events...:-P)
+        for (String tagName : getAllTagNames()) {
+            deleteTag(tagName);
+        }
+        for (Map.Entry<String, Object> e : newTags.entrySet()) {
+            setTag(e.getKey(), e.getValue());
+        }
+    }
+    
     private /*final*/ transient List<DrawingListener> drawingListeners =
         new ArrayList<DrawingListener>();  // field can't be final because of deserialization
 
@@ -210,6 +253,11 @@ public class Drawing implements Serializable {
 
     // need to define non-anonymous class for this to facilitate serialization
     private class DrawingObjectEventForwarderClass implements DrawingObjectListener, Serializable {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -3155603009672189788L;
+
         @Override
         public void onDrawingObjectEvent(DrawingObjectEvent e) {
             if (!Drawing.this.fireEvent(e)) {

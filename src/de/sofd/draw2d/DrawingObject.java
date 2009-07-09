@@ -35,6 +35,8 @@ import java.io.Serializable;
  */
 public abstract class DrawingObject implements Serializable, Cloneable {
     
+    private static final long serialVersionUID = -3793808304161426235L;
+
     private /*final*/ transient List<DrawingObjectListener> drawingObjectListeners =
         new ArrayList<DrawingObjectListener>();  // field can't be final because of deserialization
     

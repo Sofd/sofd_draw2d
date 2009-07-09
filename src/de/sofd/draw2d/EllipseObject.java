@@ -6,6 +6,8 @@ import java.awt.geom.Rectangle2D;
 
 public class EllipseObject extends DrawingObject {
 
+    private static final long serialVersionUID = 3905185786243383543L;
+    
     /**
      * the ellipse shape this EllipseObject represents
      */

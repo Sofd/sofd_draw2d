@@ -9,6 +9,8 @@ import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.event.PolygonPointAddEvent;
 
 public class PolygonObject extends DrawingObject {
+    
+    private static final long serialVersionUID = -1665813672031268850L;
 
     private ArrayList<Point2D> points = new ArrayList<Point2D>();
     private boolean isClosed = true;
