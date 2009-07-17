@@ -38,38 +38,57 @@ public abstract class ObjectCreatorByBBoxTool extends DrawingViewerTool {
     
     @Override
     public void associateWithViewer(DrawingViewer viewer) {
+        if (currentObject != null) {  // should never happen, but just to be sure...
+            getAssociatedViewer().getDrawing().removeDrawingObject(currentObject);
+        }
         super.associateWithViewer(viewer);
+        currentObject = null;
+        pt0 = null;
     }
     
     @Override
     public void disassociateFromViewer() {
+        if (currentObject != null) {
+            getAssociatedViewer().getDrawing().removeDrawingObject(currentObject);
+        }
         super.disassociateFromViewer();
         currentObject = null;
+        pt0 = null;
     }
     
     @Override
     public void mousePressed(MouseEvent e) {
-        Point2D ptInObjCoords = getAssociatedViewer().displayToObj(e.getPoint());
-        pt0 = ptInObjCoords;
-        currentObject = null;
+        if (currentObject == null) {
+            if (pt0 == null) {
+                Point2D ptInObjCoords = getAssociatedViewer().displayToObj(e.getPoint());
+                pt0 = ptInObjCoords;
+            } else {
+                currentObject = null;
+                pt0 = null;
+            }
+        }
     }
     
     @Override
     public void mouseDragged(MouseEvent e) {
         Point2D ptInObjCoords = getAssociatedViewer().displayToObj(e.getPoint());
-        if (null == currentObject) {
+        if (null == currentObject && null != pt0) {
             currentObject = createNewObject();
             currentObject.setLocation(pt0, ptInObjCoords);
             getAssociatedViewer().getDrawing().addDrawingObject(currentObject);
+        } else if (currentObject != null) {
+            currentObject.setLocation(pt0, ptInObjCoords);
         }
-        currentObject.setLocation(pt0, ptInObjCoords);
     }
     
     @Override
     public void mouseReleased(MouseEvent e) {
         if (null != currentObject) {
-            currentObject.setTag(TagNames.TN_CREATION_COMPLETED, true);
+            DrawingObject drobj = currentObject;
+            currentObject = null;
+            drobj.setTag(TagNames.TN_CREATION_COMPLETED, true);
         }
+        pt0 = null;
     }
     
 }
