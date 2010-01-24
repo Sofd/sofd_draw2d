@@ -95,7 +95,8 @@ public class DrawingObjectViewerAdapter {
      * You should override, or your objects will be invisible unless they're
      * selected.
      * 
-     * @param gc
+     * @param gc the GC to draw on. IMPORTANT: The implementation MUST ensure that gc's
+     *        state after this method returns is the same as before it was called.
      */
     public void paintObjectOn(GC gc) {
         
@@ -113,7 +114,8 @@ public class DrawingObjectViewerAdapter {
      * object. It draws nothing if the object is not selected.
      * 
      * @param gc
-     *            graphics to paint onto
+     *            GC to paint onto. IMPORTANT: The implementation MUST ensure that gc's
+     *            state after this method returns is the same as before it was called.
      * @param isSelected
      *            flags that tells whether the object is actually selected in
      *            the viewer atm. Normally you'd only draw anything if it is.
