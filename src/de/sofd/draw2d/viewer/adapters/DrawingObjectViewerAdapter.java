@@ -14,6 +14,7 @@ import de.sofd.draw2d.DrawingObject;
 import de.sofd.draw2d.Location;
 import de.sofd.draw2d.event.DrawingObjectEvent;
 import de.sofd.draw2d.viewer.DrawingViewer;
+import de.sofd.draw2d.viewer.gc.GC;
 import de.sofd.draw2d.viewer.tools.DrawingViewerTool;
 
 /**
@@ -50,6 +51,16 @@ import de.sofd.draw2d.viewer.tools.DrawingViewerTool;
  * {@link ObjectViewerAdapterFactory} (most likely you'll subclass
  * {@link DefaultObjectViewerAdapterFactory}), and supply that to the viewer in
  * the constructor.
+ * <p>
+ * This class draws onto the {@link Graphics2D} of the {@link GC} object passed into it.
+ * That means that if you want to draw on some completely different kind of
+ * 2D surface using your own, specially prepared or subclassed GC instances
+ * (see the {@link GC} documentation for more details on how to do that),
+ * you'll have to write you own DrawingObjectViewerAdapter hierarchy by
+ * subclassing this class and replacing (overriding without calling super)
+ * at least {@link #paintObjectOn(GC) } and
+ * {@link #paintSelectionVisualizationOn(GC, boolean) }, and then
+ * base your hierarchy on that new subclass.
  * 
  * @author Olaf Klischat
  */
@@ -75,18 +86,18 @@ public class DrawingObjectViewerAdapter {
 
     /**
      * Paint the {@link #getDrawingObject()} of this adapter to the given
-     * Graphics2D. This should *not* also paint anything if the object is
+     * GC. This should *not* also paint anything if the object is
      * selected -- use
-     * {@link #paintSelectionVisualizationOn(Graphics2D, boolean)} for that (the
+     * {@link #paintSelectionVisualizationOn(GC, boolean)} for that (the
      * reason for doing this in two methods is that DrawingViewer wants to paint
      * the selection visualizations of selected objects above all the objects
      * themselves). The default implementation of this method paints nothing.
-     * Your should override, or your objects will be invisible unless they're
+     * You should override, or your objects will be invisible unless they're
      * selected.
      * 
-     * @param g2d
+     * @param gc
      */
-    public void paintObjectOn(Graphics2D g2d) {
+    public void paintObjectOn(GC gc) {
         
     }
 
@@ -101,14 +112,18 @@ public class DrawingObjectViewerAdapter {
      * (defined by {@link #getHandleCount()} / {@link #getHandle(int)}) of the
      * object. It draws nothing if the object is not selected.
      * 
-     * @param g2d
+     * @param gc
      *            graphics to paint onto
      * @param isSelected
      *            flags that tells whether the object is actually selected in
      *            the viewer atm. Normally you'd only draw anything if it is.
      */
-    public void paintSelectionVisualizationOn(Graphics2D g2d, boolean isSelected) {
+    public void paintSelectionVisualizationOn(GC gc, boolean isSelected) {
         if (isSelected) {
+            Graphics2D g2d = gc.getGraphics2D();
+            if (null == g2d) {
+                throw new IllegalStateException("Don't know how to paint on a GC that doesn't hold a Graphics2D. Override me!");
+            }
             g2d.setPaint(Color.GREEN);
             // by default, draw all the object's handles
             int count = getHandleCount();

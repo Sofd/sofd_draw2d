@@ -19,6 +19,7 @@ import de.sofd.draw2d.Drawing;
 import de.sofd.draw2d.DrawingObject;
 import de.sofd.draw2d.viewer.DrawingViewer;
 import de.sofd.draw2d.viewer.backend.DrawingViewerBackend;
+import de.sofd.draw2d.viewer.gc.GC;
 import de.sofd.draw2d.viewer.tools.DrawingViewerTool;
 
 
@@ -134,7 +135,7 @@ public class JDrawingViewer extends JPanel {
         // draw background image
         renderImage(userGraphics);
         // let the viewer paint itself on top
-        wrappedViewer.paint(userGraphics);
+        wrappedViewer.paint(new GC(userGraphics));
     }
 
 

@@ -7,6 +7,7 @@ import java.awt.geom.Point2D;
 
 import de.sofd.draw2d.PolygonObject;
 import de.sofd.draw2d.viewer.DrawingViewer;
+import de.sofd.draw2d.viewer.gc.GC;
 
 public class PolygonObjectViewerAdapter extends DrawingObjectViewerAdapter {
 
@@ -20,7 +21,8 @@ public class PolygonObjectViewerAdapter extends DrawingObjectViewerAdapter {
     }
     
     @Override
-    public void paintObjectOn(Graphics2D g2d) {
+    public void paintObjectOn(GC gc) {
+        Graphics2D g2d = (Graphics2D) gc.getGraphics2D().create();
         g2d.setPaint(getDrawingObject().getColor());
         g2d.transform(getViewer().getObjectToDisplayTransform());
         g2d.setStroke(new BasicStroke(0));

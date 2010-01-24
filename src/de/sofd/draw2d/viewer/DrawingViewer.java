@@ -33,6 +33,7 @@ import de.sofd.draw2d.viewer.backend.DrawingViewerBackend;
 import de.sofd.draw2d.viewer.event.DrawingViewerEvent;
 import de.sofd.draw2d.viewer.event.DrawingViewerListener;
 import de.sofd.draw2d.viewer.event.DrawingViewerSelectionChangeEvent;
+import de.sofd.draw2d.viewer.gc.GC;
 import de.sofd.draw2d.viewer.test.JDrawingViewer;
 import de.sofd.draw2d.viewer.tools.DrawingViewerTool;
 import de.sofd.util.IdentityHashSet;
@@ -635,32 +636,32 @@ public class DrawingViewer {
      * the objects, selection handles, focus lines etc. directly on top of
      * whatever might already have been painted on g2d.
      * 
-     * @param g2d
-     *            the Graphics2D context to paint on
+     * @param gc
+     *            the {@link GC} to paint on
      */
-    public void paint(Graphics2D g2d) {
+    public void paint(GC gc) {
         if (drawing == null) {
             return;
         }
         for (DrawingObject drobj : drawing.getObjects()) {
             DrawingObjectViewerAdapter drawingAdapter = objectDrawingAdapters.get(drobj);
             assert drawingAdapter != null;
-            Rectangle clip = g2d.getClipBounds();
+            Rectangle clip = gc.getClipBounds();
             if (clip != null && !drawingAdapter.intersectsDisp(clip)) {
                 continue;
             }
-            drawingAdapter.paintObjectOn((Graphics2D) g2d.create());
+            drawingAdapter.paintObjectOn(gc);  // TODO: save/restore gc's state before/after this? (we did when we still used Graphics2D directly?)
         }
         // paint the selection visualizations on top of all the objects'
         // outlines themselves
         for (DrawingObject drobj : drawing.getObjects()) {
             DrawingObjectViewerAdapter drawingAdapter = objectDrawingAdapters.get(drobj);
             assert drawingAdapter != null;
-            Rectangle clip = g2d.getClipBounds();
+            Rectangle clip = gc.getClipBounds();
             if (clip != null && !drawingAdapter.intersectsDisp(clip)) {
                 continue;
             }
-            drawingAdapter.paintSelectionVisualizationOn((Graphics2D) g2d.create(), isSelected(drobj));
+            drawingAdapter.paintSelectionVisualizationOn(gc, isSelected(drobj));  // TODO: (see above)
         }
     }
 

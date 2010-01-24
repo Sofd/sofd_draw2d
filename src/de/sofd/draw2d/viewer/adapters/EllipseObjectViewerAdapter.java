@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 
 import de.sofd.draw2d.EllipseObject;
 import de.sofd.draw2d.viewer.DrawingViewer;
+import de.sofd.draw2d.viewer.gc.GC;
 
 public class EllipseObjectViewerAdapter extends DrawingObjectViewerAdapter {
 
@@ -18,7 +19,8 @@ public class EllipseObjectViewerAdapter extends DrawingObjectViewerAdapter {
     }
     
     @Override
-    public void paintObjectOn(Graphics2D g2d) {
+    public void paintObjectOn(GC gc) {
+        Graphics2D g2d = (Graphics2D) gc.getGraphics2D().create();
         g2d.setPaint(getDrawingObject().getColor());
         g2d.transform(getViewer().getObjectToDisplayTransform());
         g2d.setStroke(new BasicStroke(0));
