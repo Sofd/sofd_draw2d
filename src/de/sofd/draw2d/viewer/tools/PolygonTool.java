@@ -61,6 +61,8 @@ public class PolygonTool extends DrawingViewerTool {
     @Override
     public void mouseDragged(MouseEvent e) {
         Point2D currPointDisp = e.getPoint();
+        if(latestPointDisp == null)
+            return;
         if (getDistance(currPointDisp, latestPointDisp) < MIN_EDGE_LENGTH_DISP) {
             return;
         }
