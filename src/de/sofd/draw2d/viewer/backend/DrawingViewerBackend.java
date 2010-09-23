@@ -1,8 +1,5 @@
 package de.sofd.draw2d.viewer.backend;
 
-import java.awt.Graphics2D;
-import java.awt.event.InputEvent;
-
 import de.sofd.draw2d.viewer.DrawingViewer;
 
 /**

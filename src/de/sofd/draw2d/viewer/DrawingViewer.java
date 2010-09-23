@@ -1,6 +1,5 @@
 package de.sofd.draw2d.viewer;
 
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
