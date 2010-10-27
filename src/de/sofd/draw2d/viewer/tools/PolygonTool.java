@@ -54,6 +54,7 @@ public class PolygonTool extends DrawingViewerTool {
         if (null != currentPolygon) {
             getAssociatedViewer().getDrawing().removeDrawingObject(currentPolygon);
             currentPolygon = null;
+            e.consume();
         }
         latestPointDisp = e.getPoint();
     }
@@ -64,6 +65,7 @@ public class PolygonTool extends DrawingViewerTool {
         if(latestPointDisp == null)
             return;
         if (getDistance(currPointDisp, latestPointDisp) < MIN_EDGE_LENGTH_DISP) {
+            e.consume();
             return;
         }
         if (null == currentPolygon) {
@@ -76,6 +78,7 @@ public class PolygonTool extends DrawingViewerTool {
         Point2D currPoint = getAssociatedViewer().displayToObj(currPointDisp);
         currentPolygon.appendPoint(currPoint);
         latestPointDisp = currPointDisp;
+        e.consume();
     }
     
     @Override
@@ -85,6 +88,7 @@ public class PolygonTool extends DrawingViewerTool {
             PolygonObject p = currentPolygon;
             currentPolygon = null;
             p.setTag(TagNames.TN_CREATION_COMPLETED, true);
+            e.consume();
         }
     }
 

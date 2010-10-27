@@ -66,6 +66,7 @@ public abstract class ObjectCreatorByBBoxTool extends DrawingViewerTool {
                 currentObject = null;
                 pt0 = null;
             }
+            e.consume();
         }
     }
     
@@ -79,6 +80,7 @@ public abstract class ObjectCreatorByBBoxTool extends DrawingViewerTool {
         } else if (currentObject != null) {
             currentObject.setLocation(pt0, ptInObjCoords);
         }
+        e.consume();
     }
     
     @Override
@@ -89,6 +91,7 @@ public abstract class ObjectCreatorByBBoxTool extends DrawingViewerTool {
             drobj.setTag(TagNames.TN_CREATION_COMPLETED, true);
         }
         pt0 = null;
+        e.consume();
     }
     
 }

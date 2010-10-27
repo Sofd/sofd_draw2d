@@ -41,13 +41,17 @@ public class SelectorTool extends DrawingViewerTool {
                 if (null != handle) {
                     draggedHandle = handle;
                     state = State.HANDLE_DRAGGING;
+                    e.consume();
                     return;
                 }
             }
             
             DrawingObject clickedObj = getAssociatedViewer().getTopmostDrawingObjectAtDispCoord(ptInDisplayCoords);
             if (null == clickedObj) {
-                getAssociatedViewer().clearSelection();
+                if (!getAssociatedViewer().getSelection().isEmpty()) {
+                    getAssociatedViewer().clearSelection();
+                    e.consume();
+                }
                 return;
             }
             if ((e.getModifiersEx() & InputEvent.SHIFT_DOWN_MASK) == InputEvent.SHIFT_DOWN_MASK) {
@@ -57,6 +61,7 @@ public class SelectorTool extends DrawingViewerTool {
             }
             latestSelectionDragPt = ptInObjCoords;
             state = State.SELECTION_DRAGGING;
+            e.consume();
         }
     }
     
@@ -72,6 +77,7 @@ public class SelectorTool extends DrawingViewerTool {
             } catch (NoSuchMouseHandleException ex) {
                 state = State.IDLE;
             }
+            e.consume();
             break;
             
         case SELECTION_DRAGGING:
@@ -81,6 +87,7 @@ public class SelectorTool extends DrawingViewerTool {
                 drobj.moveBy(dx, dy);
             }
             latestSelectionDragPt = ptInObjCoords;
+            e.consume();
             break;
 
         }
@@ -88,7 +95,10 @@ public class SelectorTool extends DrawingViewerTool {
     
     @Override
     public void mouseReleased(MouseEvent e) {
-        state = State.IDLE;
+        if (state != State.IDLE) {
+            state = State.IDLE;
+            e.consume();
+        }
     }
     
 }
