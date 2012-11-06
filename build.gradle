@@ -1,0 +1,12 @@
+dependencies {
+    compile project(':sofd_util')
+}
+
+task runTestApp(dependsOn:build) {
+    doLast {
+        project.javaexec {
+            setMain 'de.sofd.draw2d.viewer.test.DrawingViewerTestApp'
+            classpath project.sourceSets.main.runtimeClasspath
+        }
+    }
+}
